@@ -39,3 +39,12 @@ In order to build the project, make sure to have:
 * flex
 * bison
 * llvm (along with clang++ compiler)
+
+## TODO (planned)
+- [ ] simple project structure (lexical and syntaxical analysis)
+- [ ] include llvm
+- [ ] support basic arithmetic/relational operations
+- [ ] support control structures (branching, loops)
+- [ ] support functions
+- [ ] support classes
+
