@@ -5,7 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "LLVMCOdegen.hpp"
+#include "LLVMCodegen.hpp"
 
 std::unique_ptr<Module> TheModule;
 LLVMContext TheContext;

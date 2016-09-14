@@ -19,15 +19,15 @@
 PROGRAM = vlang
 CXX = clang++
 CXXFLAGS = $(shell llvm-config --cxxflags)
-LDFLAGS = $(shell --ldflags --system-libs --libs core native mcjit)
+LDFLAGS = $(shell llvm-config --ldflags --system-libs --libs core native mcjit)
 FILES = Makefile parser.ypp lexer.lex
 CLOC = $(shell type -p cloc || echo wc -l)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-$(PROGRAM): lex.yy.o parser.tab.o llvm_codegen.o
+$(PROGRAM): lex.yy.o parser.tab.o LLVMCodegen.o Expression.o
 	$(CXX) -o $@ $^ $(LDFLAGS)
-parser.tab.o: parser.tab.cpp parser.tab.hpp
+parser.tab.o: parser.tab.cpp parser.tab.hpp LLVMCodegen.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 parser.tab.cpp parser.tab.hpp: parser.ypp
 	bison -d -v $<
@@ -35,7 +35,9 @@ lex.yy.o: lex.yy.c parser.tab.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 lex.yy.c: lexer.lex
 	flex $<
-llvm_codegen.o: llvm_codegen.cpp llvm_codegen.hpp
+LLVMCodegen.o: LLVMCodegen.cpp LLVMCodegen.hpp
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
+Expression.o: Expression.cpp Expression.hpp LLVMCodegen.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
