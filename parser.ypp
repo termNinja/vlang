@@ -3,6 +3,13 @@
 #include <vector>
 #include <string>
 
+#include "Expression.hpp"
+#include "Statement.hpp"
+#include "LLVMCodegen.hpp"
+#include "Types.hpp"
+
+using namespace vlang;
+
 #define YYDEBUG 1
 
 int yylex();
@@ -10,14 +17,13 @@ void yyerror(const std::string &err_msg) {
 	std::cerr << err_msg << std::endl;
 	exit(EXIT_FAILURE);
 }
+
 %}
 
-/* Constants */
-%token int_val_tok double_val_tok str_val_tok
 /* Types */
-%token int_ty_tok double_ty_tok string_ty_tok
+%token int_ty_tok double_ty_tok string_ty_tok void_ty_tok
 /* Methods */
-%token stdout_printf_tok 
+%token stdout_printf_tok
 /* Keywords */
 %token main_tok return_tok
 
@@ -25,27 +31,98 @@ void yyerror(const std::string &err_msg) {
 	int int_val;
 	double double_val;
 	std::string* str_val;
+	vlang::ExprAST* expr;
+	vlang::PrototypeAST* proto;
+	vlang::VLANG_TYPE vtype;
+	std::vector<std::pair<vlang::VLANG_TYPE, std::string> >* vec_pair_type_name;
+	std::pair<vlang::VLANG_TYPE, std::string>* pair_type_name;
 }
+
+%left '+' '-'
+%left '*' '/'
+
+%type <expr> Expr
+%token <int_val> int_val_tok
+%token <double_val> double_val_tok
+%token <str_val> str_val_tok id_tok
+
+%type <proto> FunDeclaration
+%type <vtype> VlangType
+%type <pair_type_name> Arg
+%type <vec_pair_type_name> ArgList
 
 %%
-/* Program is a... */
-Program: int_ty_tok main_tok '(' ')' '{' Body '}' {
-	std::cout << "int main has been parsed! :)" << std::endl;
+/* Program is a series of statements */
+Program: Program Stmt
+| Stmt
+;
+
+/* A statement is something like a function declaration,
+class creation, enum creation, function definition...*/
+Stmt: FunDeclaration ';' {
+	std::cout << $1->dump() << std::endl;
 }
-|
 ;
 
-Body: Body ';' Command
-| Command ';'
+FunDeclaration: VlangType id_tok '(' ArgList ')' ';' {
+	$$ = new PrototypeAST(*$2, $1, *$4);
+	delete $2;
+	delete $4;
+}
 ;
 
-Command: return_tok int_val_tok
+VlangType: int_ty_tok {
+	$$ = VLANG_TYPE::INT32;
+}
+| double_ty_tok {
+	$$ = VLANG_TYPE::DOUBLE;
+}
+| string_ty_tok {
+	$$ = VLANG_TYPE::STRING;
+}
+| void_ty_tok {
+	$$ = VLANG_TYPE::VOID;
+}
 ;
+
+ArgList: ArgList ',' Arg {
+	$$ = $1;
+	$$->push_back(*$3);
+	delete $3;
+}
+| Arg {
+	$$ = new std::vector<std::pair<VLANG_TYPE, std::string> >();
+	$$->push_back(*$1);
+	delete $1;
+}
+;
+
+Arg: VlangType id_tok {
+	$$ = new std::pair($1, *$2);
+	delete $2;
+}
+
+/* Instruction is what we write inside functions like function calls,
+return, expression evaluation etc. */
+Instruction: return_tok Expr
+| Expr
+;
+
+Expr: '(' Expr ')' {
+	$$ = $2;
+}
+| Expr '+' Expr
+| Expr '-' Expr
+| int_val_tok {
+
+}
+| double_val_tok {
+
+}
 
 %%
 int main() {
 	yyparse();
-	std::cout << "Hello world!" << std::endl;
 	return 0;
 }
 

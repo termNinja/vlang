@@ -1,5 +1,5 @@
 /*
- * llvm_codegen.cpp
+ * LLVMCodegen.cpp
  * Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
  *
  * Distributed under terms of the MIT license.
@@ -16,12 +16,21 @@ std::unique_ptr<legacy::FunctionPassManager> TheFPM;
 Function* mainFunction = nullptr;
 
 void initializeModuleAndPassManager() {
-	TheModule = make_unique<Module>("pasftw", TheContext);
+	TheModule = make_unique<Module>("VLANG MODULE", TheContext);
 	TheFPM = make_unique<legacy::FunctionPassManager>(TheModule.get());
 	TheFPM->doInitialization();
 }
 
-AllocaInst* createEntryBlockAlloca(Function* TheFunction, const std::string& name) {
+AllocaInst* CreateEntryBlockAllocaInt32(Function* TheFunction, const std::string& name) {
 	IRBuilder<> b(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
 	return b.CreateAlloca(Type::getInt32Ty(TheContext), 0, name.c_str());
+}
+
+AllocaInst* CreateEntryBlockAllocaInt64(Function* TheFunction, const std::string& name) {
+	IRBuilder<> b(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
+	return b.CreateAlloca(Type::getInt64Ty(TheContext), 0, name.c_str());
+}
+AllocaInst* CreateEntryBlockAllocaDouble(Function* TheFunction, const std::string& name) {
+	IRBuilder<> b(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
+	return b.CreateAlloca(Type::getDoubleTy(TheContext), 0, name.c_str());
 }

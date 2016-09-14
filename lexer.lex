@@ -7,6 +7,12 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
+
+#include "Types.hpp"
+#include "Expression.hpp"
+#include "Statement.hpp"
+#include "LLVMCodegen.hpp"
+
 #include "parser.tab.hpp"
 %}
 
@@ -14,6 +20,7 @@
 int 								{ return int_ty_tok; 		}
 double 								{ return double_ty_tok; 	}
 string 								{ return string_ty_tok; 	}
+void 								{ return void_ty_tok; 		}
 
 stdout[.]printf 					{ return stdout_printf_tok; }
 
@@ -26,6 +33,11 @@ return 								{ return return_tok; }
 	return str_val_tok;
 }
 
+[a-zA-Z_][a-zA-Z0-9_]* {
+	yylval.str_val = new std::string(yytext);
+	return id_tok;
+}
+
 [+-]?[0-9]+ { 
 	yylval.int_val = atoi(yytext);
 	return int_val_tok;
@@ -35,7 +47,7 @@ return 								{ return return_tok; }
 	return double_val_tok;
 }
 
-[<>;=!&|:?(){}\[\]+*/%-] {
+[,.<>;=!&|:?(){}\[\]+*/%-] {
 	return *yytext;
 }
 
