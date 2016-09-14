@@ -18,6 +18,14 @@ Vala supports:
 
 Here's a Vala code for hello world:
 ```vala
+int main() {
+	stdout.printf("Hello, World\n");
+	return 0;
+}
+```
+
+Or similar to Java and C# with a static main function:
+```vala
 class Demo.HelloWorld : GLib.Object {
 
     public static int main(string[] args) {
@@ -41,8 +49,8 @@ In order to build the project, make sure to have:
 * llvm (along with clang++ compiler)
 
 ## TODO (planned)
-- [ ] simple project structure (lexical and syntaxical analysis)
-- [ ] include llvm
+- [x] simple project structure (lexical and syntaxical analysis)
+- [x] include llvm
 - [ ] support basic arithmetic/relational operations
 - [ ] support control structures (branching, loops)
 - [ ] support functions

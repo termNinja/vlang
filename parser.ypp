@@ -1,0 +1,51 @@
+%{
+#include <iostream>
+#include <vector>
+#include <string>
+
+#define YYDEBUG 1
+
+int yylex();
+void yyerror(const std::string &err_msg) {
+	std::cerr << err_msg << std::endl;
+	exit(EXIT_FAILURE);
+}
+%}
+
+/* Constants */
+%token int_val_tok double_val_tok str_val_tok
+/* Types */
+%token int_ty_tok double_ty_tok string_ty_tok
+/* Methods */
+%token stdout_printf_tok 
+/* Keywords */
+%token main_tok return_tok
+
+%union {
+	int int_val;
+	double double_val;
+	std::string* str_val;
+}
+
+%%
+/* Program is a... */
+Program: int_ty_tok main_tok '(' ')' '{' Body '}' {
+	std::cout << "int main has been parsed! :)" << std::endl;
+}
+|
+;
+
+Body: Body ';' Command
+| Command ';'
+;
+
+Command: return_tok int_val_tok
+;
+
+%%
+int main() {
+	yyparse();
+	std::cout << "Hello world!" << std::endl;
+	return 0;
+}
+
