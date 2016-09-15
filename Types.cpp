@@ -9,6 +9,55 @@
 
 namespace vlang {
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// INT32
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+std::string Int32Type::str() const {
+	return "int";
+}
+
+VLANG_TYPE Int32Type::vlang_type() const {
+	return VLANG_TYPE::INT32;
+}
+
+Type* Int32Type::llvm_type() const {
+	return LLVM_INTTY;
+}
+
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// DOUBLE TYPE
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+std::string DoubleType::str() const {
+	return "double";
+}
+
+VLANG_TYPE DoubleType::vlang_type() const {
+	return VLANG_TYPE::DOUBLE;
+}
+
+Type* DoubleType::llvm_type() const {
+	return LLVM_DOUBLETY;
+}
+
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// STRING TYPE
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+std::string StringType::str() const {
+	return "string";
+}
+
+Type* StringType::llvm_type() const {
+	std::cerr << "TOOD: StringType::llvm_type()" << std::endl;
+	return nullptr;
+}
+
+VLANG_TYPE StringType::vlang_type() const {
+	return VLANG_TYPE::STRING;
+}
+
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// UTILS
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 std::string to_str(VLANG_TYPE type) {
 	switch (type) {
 		case INT32:
@@ -22,7 +71,7 @@ std::string to_str(VLANG_TYPE type) {
 		case STRING:
 			return "string";
 		case VOID:
-			return "void"
+			return "void";
 		default:
 			return "unknown_type";
 	}

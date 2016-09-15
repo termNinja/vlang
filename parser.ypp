@@ -7,6 +7,7 @@
 #include "Statement.hpp"
 #include "LLVMCodegen.hpp"
 #include "Types.hpp"
+#include "TypeChecker.hpp"
 
 using namespace vlang;
 
@@ -25,7 +26,7 @@ void yyerror(const std::string &err_msg) {
 /* Methods */
 %token stdout_printf_tok
 /* Keywords */
-%token main_tok return_tok
+%token return_tok
 
 %union {
 	int int_val;
@@ -55,6 +56,7 @@ void yyerror(const std::string &err_msg) {
 /* Program is a series of statements */
 Program: Program Stmt
 | Stmt
+|
 ;
 
 /* A statement is something like a function declaration,
@@ -62,15 +64,63 @@ class creation, enum creation, function definition...*/
 Stmt: FunDeclaration ';' {
 	std::cout << $1->dump() << std::endl;
 }
+| FunDefinition {
+}
 ;
 
-FunDeclaration: VlangType id_tok '(' ArgList ')' ';' {
+/* A function declaration */
+FunDeclaration: VlangType id_tok '(' ArgList ')' {
 	$$ = new PrototypeAST(*$2, $1, *$4);
 	delete $2;
 	delete $4;
 }
 ;
 
+/* A function definition */
+FunDefinition: FunDeclaration '{' Instructions '}' {
+
+}
+;
+
+/* A chain of instructions */
+Instructions: Instructions Instruction ';' {
+}
+| Instruction ';' {
+
+}
+;
+
+/* Instruction is what we write inside functions like function calls,
+return, expression evaluation etc. */
+Instruction: return_tok Expr
+| Expr
+;
+
+Expr: '(' Expr ')' {
+	$$ = $2;
+}
+| Expr '+' Expr {
+	bool typesCorrect = TypeChecker::checkTypes($1, $3);
+	if (typesCorrect)  {
+		$$ = new BinaryExprAST("+", $1, $3);
+	} else {
+		// TODO fancy error report
+		$$ = new BinaryExprAST("+", $1, $3);
+		std::cerr << "Type mysmatch!" << std::endl;
+	}
+}
+| Expr '-' Expr {
+
+}
+| int_val_tok {
+	$$ = new ConstIntExprAST($1);
+}
+| double_val_tok {
+	$$ = new ConstDoubleExprAST($1);
+}
+
+
+/* What kind of types are supported */
 VlangType: int_ty_tok {
 	$$ = VLANG_TYPE::INT32;
 }
@@ -85,6 +135,7 @@ VlangType: int_ty_tok {
 }
 ;
 
+/* A chain of function arguments */
 ArgList: ArgList ',' Arg {
 	$$ = $1;
 	$$->push_back(*$3);
@@ -95,33 +146,20 @@ ArgList: ArgList ',' Arg {
 	$$->push_back(*$1);
 	delete $1;
 }
+| {
+	$$ = new std::vector<std::pair<VLANG_TYPE, std::string> >();
+}
 ;
 
+/* A function argument */
 Arg: VlangType id_tok {
-	$$ = new std::pair($1, *$2);
+	$$ = new std::pair<VLANG_TYPE, std::string>($1, *$2);
 	delete $2;
-}
-
-/* Instruction is what we write inside functions like function calls,
-return, expression evaluation etc. */
-Instruction: return_tok Expr
-| Expr
-;
-
-Expr: '(' Expr ')' {
-	$$ = $2;
-}
-| Expr '+' Expr
-| Expr '-' Expr
-| int_val_tok {
-
-}
-| double_val_tok {
-
 }
 
 %%
 int main() {
+	/*yydebug = 1;*/
 	yyparse();
 	return 0;
 }

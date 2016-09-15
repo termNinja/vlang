@@ -8,10 +8,10 @@
 #include <vector>
 #include <string>
 
+#include "LLVMCodegen.hpp"
 #include "Types.hpp"
 #include "Expression.hpp"
 #include "Statement.hpp"
-#include "LLVMCodegen.hpp"
 
 #include "parser.tab.hpp"
 %}
@@ -24,7 +24,6 @@ void 								{ return void_ty_tok; 		}
 
 stdout[.]printf 					{ return stdout_printf_tok; }
 
-main 								{ return main_tok; }
 return 								{ return return_tok; }
 
 ["][^"]*["] {
