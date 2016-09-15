@@ -17,14 +17,18 @@
 %}
 
 %%
-int 								{ return int_ty_tok; 		}
-double 								{ return double_ty_tok; 	}
-string 								{ return string_ty_tok; 	}
-void 								{ return void_ty_tok; 		}
+int 				return int_ty_tok;
+double				return double_ty_tok;
+string 				return string_ty_tok;
+void 				return void_ty_tok;
+if 			 		return if_tok;
+else 				return else_tok;
+while 				return while_tok;
+for 				return for_tok;
 
-stdout[.]printf 					{ return stdout_printf_tok; }
+stdout[.]printf 					 return stdout_printf_tok;
 
-return 								{ return return_tok; }
+return 								 return return_tok;
 
 ["][^"]*["] {
 	std::string tmp(yytext);
@@ -37,7 +41,7 @@ return 								{ return return_tok; }
 	return id_tok;
 }
 
-[+-]?[0-9]+ { 
+[+-]?[0-9]+ {
 	yylval.int_val = atoi(yytext);
 	return int_val_tok;
 }

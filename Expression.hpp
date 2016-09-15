@@ -1,11 +1,12 @@
 #ifndef EXPRESSION_HPP
 #define EXPRESSION_HPP
 
-#include "LLVMCodegen.hpp"
-#include "Types.hpp"
 #include <boost/lexical_cast.hpp>
 #include <exception>
 #include <vector>
+
+#include "LLVMCodegen.hpp"
+#include "Types.hpp"
 
 namespace vlang {
 
@@ -111,22 +112,6 @@ private:
 	ExprAST* m_right;
 };
 
-/// \brief Represents a block expression.
-class BlockExprAST : public ExprAST {
-public:
-	BlockExprAST(std::vector<ExprAST*> cmds)
-		: m_cmds(cmds)
-	{}
-	~BlockExprAST() {
-		for (auto &cmd : m_cmds) delete cmd;
-	}
-	virtual std::string dump(unsigned level = 0) const;
-	virtual VLANG_TYPE type() const { return VLANG_TYPE::VOID; }
-
-private:
-	std::vector<ExprAST*> m_cmds;
-};
-
 // @Deprecated
 // To be removed, prototypes are moved into Statement.hpp
 class PrototypeExprAST {
@@ -142,10 +127,6 @@ private:
 	std::vector<std::string> m_args;
 	Int32Type m_type;
 };
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// DOUBLE EXPRESSIONS
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
 
 } // ;vlang
 

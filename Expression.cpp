@@ -15,47 +15,36 @@ namespace boost{
 namespace vlang {
 
 std::string ConstIntExprAST::dump(unsigned level) const {
-	std::string res = "";
-	while (level > 0) res += "\t";
-	res += boost::lexical_cast<std::string>(m_val);
-	return res;
+	//std::string res = "";
+	//unsigned tmplvl = level;
+	//while (tmplvl > 0) {
+		//res += "\t";
+		//--tmplvl;
+	//}
+	return boost::lexical_cast<std::string>(m_val);
 }
 
 std::string ConstDoubleExprAST::dump(unsigned level) const {
-	std::string res = "";
-	while (level > 0) res += "\t";
-	res += boost::lexical_cast<std::string>(m_val);
-	return res;
+	//std::string res = "";
+	//while (level > 0) res += "\t";
+	//res += boost::lexical_cast<std::string>(m_val);
+	return boost::lexical_cast<std::string>(m_val);
 }
 
 
 std::string UnaryExprAST::dump(unsigned level) const {
 	(void)level;
-	return m_operation + m_operand->dump(0);
+	return m_operation + m_operand->dump();
 }
 
 std::string BinaryExprAST::dump(unsigned level) const {
 	(void)level;
-	return m_left->dump(0) + m_operation + m_right->dump(0);
-}
-
-std::string BlockExprAST::dump(unsigned level) const {
-	std::string res = "";
-	unsigned tmplvl = level;
-	while (tmplvl > 0) res += "\t";
-	++level;
-	res += "{\n";
-	for (auto &cmd : m_cmds) {
-		tmplvl = level;
-		while (tmplvl > 0) res += "\t";
-		res += cmd->dump(0);
-	}
-	return res;
+	return m_left->dump() + m_operation + m_right->dump();
 }
 
 std::string VariableExprAST::dump(unsigned level) const {
 	(void)level;
-	return boost::lexical_cast<std::string>(to_str(m_type)) + " " + m_name;
+	return boost::lexical_cast<std::string>(m_name);
 };
 
 } // ;vlang

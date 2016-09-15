@@ -9,8 +9,6 @@
 #include "Types.hpp"
 #include "TypeChecker.hpp"
 
-using namespace vlang;
-
 #define YYDEBUG 1
 
 int yylex();
@@ -26,31 +24,52 @@ void yyerror(const std::string &err_msg) {
 /* Methods */
 %token stdout_printf_tok
 /* Keywords */
-%token return_tok
+%token return_tok for_tok while_tok if_tok else_tok
 
 %union {
+	// Constants
 	int int_val;
 	double double_val;
 	std::string* str_val;
+
+	// Statements
+	vlang::StmtAST* stmt;
+	std::vector<vlang::StmtAST*>* vec_stmt;
+
+	// Expressions
 	vlang::ExprAST* expr;
+
+	// Functions
 	vlang::PrototypeAST* proto;
-	vlang::VLANG_TYPE vtype;
+	vlang::FunctionAST* fun;
+
+	// Other
 	std::vector<std::pair<vlang::VLANG_TYPE, std::string> >* vec_pair_type_name;
 	std::pair<vlang::VLANG_TYPE, std::string>* pair_type_name;
+	vlang::VLANG_TYPE vtype;
 }
 
+%left '='
+%left '>' '<'
 %left '+' '-'
 %left '*' '/'
 
-%type <expr> Expr
 %token <int_val> int_val_tok
 %token <double_val> double_val_tok
 %token <str_val> str_val_tok id_tok
 
+%type <expr> Expr
+
 %type <proto> FunDeclaration
+%type <fun> FunDefinition
+
 %type <vtype> VlangType
+
 %type <pair_type_name> Arg
 %type <vec_pair_type_name> ArgList
+
+%type <vec_stmt> Instructions
+%type <stmt> Instruction
 
 %%
 /* Program is a series of statements */
@@ -65,12 +84,13 @@ Stmt: FunDeclaration ';' {
 	std::cout << $1->dump() << std::endl;
 }
 | FunDefinition {
+	std::cout << $1->dump() << std::endl;
 }
 ;
 
 /* A function declaration */
 FunDeclaration: VlangType id_tok '(' ArgList ')' {
-	$$ = new PrototypeAST(*$2, $1, *$4);
+	$$ = new vlang::PrototypeAST(*$2, $1, *$4);
 	delete $2;
 	delete $4;
 }
@@ -78,60 +98,85 @@ FunDeclaration: VlangType id_tok '(' ArgList ')' {
 
 /* A function definition */
 FunDefinition: FunDeclaration '{' Instructions '}' {
-
+	$$ = new vlang::FunctionAST(*$1, new vlang::BlockStmtAST(*$3));
+	delete $1;
+	delete $3;
 }
 ;
 
 /* A chain of instructions */
 Instructions: Instructions Instruction ';' {
+	$$ = $1;
+	$$->push_back($2);
 }
 | Instruction ';' {
-
+	$$ = new std::vector<vlang::StmtAST*>();
+	$$->push_back($1);
 }
 ;
 
 /* Instruction is what we write inside functions like function calls,
 return, expression evaluation etc. */
-Instruction: return_tok Expr
-| Expr
+Instruction: return_tok Expr {
+	$$ = new vlang::ReturnStmtAST($2);
+}
+| Expr {
+	$$ = new vlang::ExpressionStmtAST($1);
+}
+| id_tok '=' Expr {
+	$$ = new vlang::AssignmentStmtAST(vlang::VLANG_TYPE::NO_VAR_DECL, *$1, $3);
+	delete $1;
+}
+| VlangType id_tok '=' Expr {
+	$$ = new vlang::AssignmentStmtAST($1, *$2, $4);
+	delete $2;
+}
 ;
 
 Expr: '(' Expr ')' {
 	$$ = $2;
 }
 | Expr '+' Expr {
-	bool typesCorrect = TypeChecker::checkTypes($1, $3);
-	if (typesCorrect)  {
-		$$ = new BinaryExprAST("+", $1, $3);
-	} else {
-		// TODO fancy error report
-		$$ = new BinaryExprAST("+", $1, $3);
-		std::cerr << "Type mysmatch!" << std::endl;
-	}
+	vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+	$$ = new vlang::BinaryExprAST("+", $1, $3);
 }
 | Expr '-' Expr {
-
+	vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+	$$ = new vlang::BinaryExprAST("-", $1, $3);
+}
+| Expr '<' Expr {
+	vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+	$$ = new vlang::BinaryExprAST("<", $1, $3);
+}
+| Expr '>' Expr {
+	vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+	$$ = new vlang::BinaryExprAST(">", $1, $3);
 }
 | int_val_tok {
-	$$ = new ConstIntExprAST($1);
+	$$ = new vlang::ConstIntExprAST($1);
 }
 | double_val_tok {
-	$$ = new ConstDoubleExprAST($1);
+	$$ = new vlang::ConstDoubleExprAST($1);
 }
+| id_tok {
+	$$ = new vlang::VariableExprAST(*$1, vlang::VLANG_TYPE::VOID);
+	delete $1;
+}
+;
 
 
 /* What kind of types are supported */
 VlangType: int_ty_tok {
-	$$ = VLANG_TYPE::INT32;
+	$$ = vlang::VLANG_TYPE::INT32;
 }
 | double_ty_tok {
-	$$ = VLANG_TYPE::DOUBLE;
+	$$ = vlang::VLANG_TYPE::DOUBLE;
 }
 | string_ty_tok {
-	$$ = VLANG_TYPE::STRING;
+	$$ = vlang::VLANG_TYPE::STRING;
 }
 | void_ty_tok {
-	$$ = VLANG_TYPE::VOID;
+	$$ = vlang::VLANG_TYPE::VOID;
 }
 ;
 
@@ -142,18 +187,18 @@ ArgList: ArgList ',' Arg {
 	delete $3;
 }
 | Arg {
-	$$ = new std::vector<std::pair<VLANG_TYPE, std::string> >();
+	$$ = new std::vector<std::pair<vlang::VLANG_TYPE, std::string> >();
 	$$->push_back(*$1);
 	delete $1;
 }
 | {
-	$$ = new std::vector<std::pair<VLANG_TYPE, std::string> >();
+	$$ = new std::vector<std::pair<vlang::VLANG_TYPE, std::string> >();
 }
 ;
 
 /* A function argument */
 Arg: VlangType id_tok {
-	$$ = new std::pair<VLANG_TYPE, std::string>($1, *$2);
+	$$ = new std::pair<vlang::VLANG_TYPE, std::string>($1, *$2);
 	delete $2;
 }
 

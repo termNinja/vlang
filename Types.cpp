@@ -61,7 +61,7 @@ VLANG_TYPE StringType::vlang_type() const {
 std::string to_str(VLANG_TYPE type) {
 	switch (type) {
 		case INT32:
-			return "int32";
+			return "int";
 		case INT64:
 			return "int64";
 		case DOUBLE:
