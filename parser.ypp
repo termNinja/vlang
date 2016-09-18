@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 #include <string>
 
 #include "Expression.hpp"
@@ -15,6 +16,7 @@
 #include "LLVMCodegen.hpp"
 #include "Types.hpp"
 #include "TypeChecker.hpp"
+#include "ProgramOptions.hpp"
 
 #define YYDEBUG 1
 
@@ -168,6 +170,18 @@ Expr: '(' Expr ')' {
     vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
     $$ = new vlang::BinaryExprAST("-", $1, $3);
 }
+| Expr '*' Expr {
+    vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+    $$ = new vlang::BinaryExprAST("*", $1, $3);
+}
+| Expr '/' Expr {
+    vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+    $$ = new vlang::BinaryExprAST("/", $1, $3);
+}
+| Expr '%' Expr {
+    vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+    $$ = new vlang::BinaryExprAST("%", $1, $3);
+}
 | Expr '<' Expr {
     vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
     $$ = new vlang::BinaryExprAST("<", $1, $3);
@@ -227,9 +241,26 @@ Arg: VlangType id_tok {
 }
 
 %%
-int main() {
+extern FILE* yyin;
+int main(int argc, char** argv) {
     /*yydebug = 1;*/
+    vlang::util::ProgramOptions::get().init(argc, argv);
+
+    // For now, we only support one file
+    if (vlang::util::ProgramOptions::get().contains_input_files()) {
+        std::string input = vlang::util::ProgramOptions::get().first_input_file();
+        std::cout << "Input file: " << input << std::endl;
+        yyin = fopen(input.c_str(), "r");
+        if (yyin == NULL) {
+            std::cerr << "Failed reading input '" << input << "'" << std::endl;
+            return 1;
+        }
+    }
+    std::cout << "Output: " << vlang::util::ProgramOptions::get().output_path() << std::endl;
+
     yyparse();
+
+    fclose(yyin);
     return 0;
 }
 
