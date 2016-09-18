@@ -11,7 +11,7 @@
 namespace vlang {
 
 typedef enum {
-    RETURN, BLOCK, IF, ASSIGNMENT, PROTOTYPE, FUNCTION, EXPRESSION
+    RETURN, BLOCK, IF, IF_ELSE, WHILE, FOR, ASSIGNMENT, PROTOTYPE, FUNCTION, EXPRESSION, EMPTY
 } STMT_TYPE;
 
 class StmtAST {
@@ -86,6 +86,12 @@ private:
     ExprAST* m_expr;
 };
 
+class EmptyStmtAST : public StmtAST {
+public:
+    std::string dump(int level = 0) const;
+    STMT_TYPE stmt_type() const { return STMT_TYPE::EMPTY; }
+};
+
 /// \brief Represents an if statement (with no else).
 class IfStmtAST : public StmtAST {
 public:
@@ -103,6 +109,55 @@ private:
     ExprAST* m_condExpr;
     StmtAST* m_thenStmt;
 };
+
+class IfElseStmtAST : public StmtAST {
+public:
+    IfElseStmtAST(ExprAST* condExpr, StmtAST* thenStmt, StmtAST* elseStmt)
+        : m_condExpr(condExpr), m_thenStmt(thenStmt), m_elseStmt(elseStmt)
+    {}
+    ~IfElseStmtAST() {
+        delete m_condExpr;
+        delete m_thenStmt;
+        delete m_elseStmt;
+    }
+    std::string dump(int level = 0) const;
+    STMT_TYPE stmt_type() const { return STMT_TYPE::IF_ELSE; }
+
+private:
+    ExprAST* m_condExpr;
+    StmtAST* m_thenStmt;
+    StmtAST* m_elseStmt;
+};
+
+class WhileStmtAST : public StmtAST {
+public:
+    WhileStmtAST(ExprAST* condExpr, StmtAST* bodyStmt)
+        : m_condExpr(condExpr), m_bodyStmt(bodyStmt)
+    {}
+    ~WhileStmtAST() {
+        delete m_condExpr;
+        delete m_bodyStmt;
+    }
+    std::string dump(int level = 0) const;
+    STMT_TYPE stmt_type() const { return STMT_TYPE::WHILE; }
+
+private:
+    ExprAST* m_condExpr;
+    StmtAST* m_bodyStmt;
+};
+
+// TODO:
+// This class shall be dealt with later once I start compiling onto
+// LLVM IR. I leave it because LLVM requires a lot of information
+// like return value in order to generated a 'call' instruction.
+// class CallFunStmtAST : public StmtAST {
+// public:
+//     CallFunStmtAST ();
+//     ~CallFunStmtAST ();
+//
+// private:
+//     std::string m_name;
+// };
 
 /// \brief Represents a function declaration.
 class PrototypeAST {

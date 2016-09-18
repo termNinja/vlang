@@ -49,6 +49,7 @@ void yyerror(const std::string &err_msg) {
     vlang::VLANG_TYPE vtype;
 }
 
+%nonassoc else_tok
 %left '='
 %left '>' '<'
 %left '+' '-' '%'
@@ -134,9 +135,18 @@ Instruction: return_tok Expr ';' {
 | if_tok '(' Expr ')' Instruction {
     $$ = new vlang::IfStmtAST($3, $5);
 }
+| if_tok '(' Expr ')' Instruction else_tok Instruction {
+    $$ = new vlang::IfElseStmtAST($3, $5, $7);
+}
+| while_tok '(' Expr ')' Instruction {
+    $$ = new vlang::WhileStmtAST($3, $5);
+}
 | '{' Instructions '}' {
     $$ = new vlang::BlockStmtAST(*$2);
     delete $2;
+}
+| ';' {
+    $$ = new vlang::EmptyStmtAST();
 }
 ;
 

@@ -65,6 +65,10 @@ std::string ExpressionStmtAST::dump(int level) const {
     return res;
 }
 
+std::string EmptyStmtAST::dump(int) const {
+    return ";";
+}
+
 std::string IfStmtAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
     res += "if (";
@@ -72,6 +76,41 @@ std::string IfStmtAST::dump(int level) const {
     if (m_thenStmt->stmt_type() != STMT_TYPE::BLOCK)
         res += "\n" + m_thenStmt->dump(level+1);
     else res += m_thenStmt->dump(level+1);
+    return res;
+}
+
+std::string IfElseStmtAST::dump(int level) const {
+    std::string res = getStrWithIndent(level);
+    res += "if (";
+    res += m_condExpr->dump() + ") ";
+
+    // if
+    if (m_thenStmt->stmt_type() != STMT_TYPE::BLOCK)
+        res += "\n" + m_thenStmt->dump(level+1);
+    else
+        res += m_thenStmt->dump(level+1);
+
+    // else
+    if (m_thenStmt->stmt_type() != STMT_TYPE::BLOCK)
+        res += "\n" + getStrWithIndent(level) + "else";
+    else
+        res += " else ";
+    if (m_elseStmt->stmt_type() != STMT_TYPE::BLOCK)
+        res += "\n" + m_elseStmt->dump(level+1);
+    else
+        res += m_elseStmt->dump(level+1);
+    return res;
+}
+
+std::string WhileStmtAST::dump(int level) const {
+    std::string res = getStrWithIndent(level);
+    res += "while (" + m_condExpr->dump() + ")";
+    if (m_bodyStmt->stmt_type() == STMT_TYPE::BLOCK) {
+        res += " " + m_bodyStmt->dump(level+1);
+    } else {
+        res += "\n" + getStrWithIndent(level+1) + m_bodyStmt->dump();
+    }
+
     return res;
 }
 
