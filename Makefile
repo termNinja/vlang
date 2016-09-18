@@ -21,7 +21,9 @@ CXX = clang++
 CXXFLAGS = -g $(shell llvm-config --cxxflags)
 LDFLAGS = $(shell llvm-config --ldflags --system-libs --libs core native mcjit)
 BOOST = -DBOOST_NO_EXCEPTIONS -DBOOST_NO_EXCEPTION_STD_NAMESPACE
-FILES = Makefile parser.ypp lexer.lex
+FILES =  Makefile parser.ypp lexer.lex Statement.hpp Statement.cpp \
+	Expression.hpp Expression.cpp LLVMCodegen.hpp LLVMCodegen.cpp TypeChecker.hpp \
+	Types.hpp Types.cpp
 CLOC = $(shell type -p cloc || echo wc -l)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -56,7 +58,7 @@ clean:
 
 dist:
 	@clear
-	@tar -cvf $(PROGRAM).tar $(FILES)
+	@tar -pczf $(PROGRAM).tar.gz $(FILES)
 	@echo "Project packed up"
 
 author:

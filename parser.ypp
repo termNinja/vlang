@@ -13,8 +13,8 @@
 
 int yylex();
 void yyerror(const std::string &err_msg) {
-	std::cerr << err_msg << std::endl;
-	exit(EXIT_FAILURE);
+    std::cerr << err_msg << std::endl;
+    exit(EXIT_FAILURE);
 }
 
 %}
@@ -27,26 +27,26 @@ void yyerror(const std::string &err_msg) {
 %token return_tok for_tok while_tok if_tok else_tok
 
 %union {
-	// Constants
-	int int_val;
-	double double_val;
-	std::string* str_val;
+    // Constants
+    int int_val;
+    double double_val;
+    std::string* str_val;
 
-	// Statements
-	vlang::StmtAST* stmt;
-	std::vector<vlang::StmtAST*>* vec_stmt;
+    // Statements
+    vlang::StmtAST* stmt;
+    std::vector<vlang::StmtAST*>* vec_stmt;
 
-	// Expressions
-	vlang::ExprAST* expr;
+    // Expressions
+    vlang::ExprAST* expr;
 
-	// Functions
-	vlang::PrototypeAST* proto;
-	vlang::FunctionAST* fun;
+    // Functions
+    vlang::PrototypeAST* proto;
+    vlang::FunctionAST* fun;
 
-	// Other
-	std::vector<std::pair<vlang::VLANG_TYPE, std::string> >* vec_pair_type_name;
-	std::pair<vlang::VLANG_TYPE, std::string>* pair_type_name;
-	vlang::VLANG_TYPE vtype;
+    // Other
+    std::vector<std::pair<vlang::VLANG_TYPE, std::string> >* vec_pair_type_name;
+    std::pair<vlang::VLANG_TYPE, std::string>* pair_type_name;
+    vlang::VLANG_TYPE vtype;
 }
 
 %left '='
@@ -81,138 +81,138 @@ Program: Program Stmt
 /* A statement is something like a function declaration,
 class creation, enum creation, function definition...*/
 Stmt: FunDeclaration ';' {
-	std::cout << $1->dump() << std::endl;
+    std::cout << $1->dump() << std::endl;
 }
 | FunDefinition {
-	std::cout << $1->dump() << std::endl;
+    std::cout << $1->dump() << std::endl;
 }
 ;
 
 /* A function declaration */
 FunDeclaration: VlangType id_tok '(' ArgList ')' {
-	$$ = new vlang::PrototypeAST(*$2, $1, *$4);
-	delete $2;
-	delete $4;
+    $$ = new vlang::PrototypeAST(*$2, $1, *$4);
+    delete $2;
+    delete $4;
 }
 ;
 
 /* A function definition */
 FunDefinition: FunDeclaration '{' Instructions '}' {
-	$$ = new vlang::FunctionAST(*$1, new vlang::BlockStmtAST(*$3));
-	delete $1;
-	delete $3;
+    $$ = new vlang::FunctionAST(*$1, new vlang::BlockStmtAST(*$3));
+    delete $1;
+    delete $3;
 }
 ;
 
 /* A chain of instructions */
 Instructions: Instructions Instruction {
-	$$ = $1;
-	$$->push_back($2);
+    $$ = $1;
+    $$->push_back($2);
 }
 | Instruction {
-	$$ = new std::vector<vlang::StmtAST*>();
-	$$->push_back($1);
+    $$ = new std::vector<vlang::StmtAST*>();
+    $$->push_back($1);
 }
 ;
 
 /* Instruction is what we write inside functions like function calls,
 return, expression evaluation etc. */
 Instruction: return_tok Expr ';' {
-	$$ = new vlang::ReturnStmtAST($2);
+    $$ = new vlang::ReturnStmtAST($2);
 }
 | Expr ';' {
-	$$ = new vlang::ExpressionStmtAST($1);
+    $$ = new vlang::ExpressionStmtAST($1);
 }
 | id_tok '=' Expr ';' {
-	$$ = new vlang::AssignmentStmtAST(vlang::VLANG_TYPE::NO_VAR_DECL, *$1, $3);
-	delete $1;
+    $$ = new vlang::AssignmentStmtAST(vlang::VLANG_TYPE::NO_VAR_DECL, *$1, $3);
+    delete $1;
 }
 | VlangType id_tok '=' Expr ';' {
-	$$ = new vlang::AssignmentStmtAST($1, *$2, $4);
-	delete $2;
+    $$ = new vlang::AssignmentStmtAST($1, *$2, $4);
+    delete $2;
 }
 | if_tok '(' Expr ')' Instruction {
-	$$ = new vlang::IfStmtAST($3, $5);
+    $$ = new vlang::IfStmtAST($3, $5);
 }
 | '{' Instructions '}' {
-	$$ = new vlang::BlockStmtAST(*$2);
-	delete $2;
+    $$ = new vlang::BlockStmtAST(*$2);
+    delete $2;
 }
 ;
 
 Expr: '(' Expr ')' {
-	$$ = $2;
+    $$ = $2;
 }
 | Expr '+' Expr {
-	vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
-	$$ = new vlang::BinaryExprAST("+", $1, $3);
+    vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+    $$ = new vlang::BinaryExprAST("+", $1, $3);
 }
 | Expr '-' Expr {
-	vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
-	$$ = new vlang::BinaryExprAST("-", $1, $3);
+    vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+    $$ = new vlang::BinaryExprAST("-", $1, $3);
 }
 | Expr '<' Expr {
-	vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
-	$$ = new vlang::BinaryExprAST("<", $1, $3);
+    vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+    $$ = new vlang::BinaryExprAST("<", $1, $3);
 }
 | Expr '>' Expr {
-	vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
-	$$ = new vlang::BinaryExprAST(">", $1, $3);
+    vlang::TypeChecker::checkTypesWithDiagnostics($1, $3);
+    $$ = new vlang::BinaryExprAST(">", $1, $3);
 }
 | int_val_tok {
-	$$ = new vlang::ConstIntExprAST($1);
+    $$ = new vlang::ConstIntExprAST($1);
 }
 | double_val_tok {
-	$$ = new vlang::ConstDoubleExprAST($1);
+    $$ = new vlang::ConstDoubleExprAST($1);
 }
 | id_tok {
-	$$ = new vlang::VariableExprAST(*$1, vlang::VLANG_TYPE::VOID);
-	delete $1;
+    $$ = new vlang::VariableExprAST(*$1, vlang::VLANG_TYPE::VOID);
+    delete $1;
 }
 ;
 
 
 /* What kind of types are supported */
 VlangType: int_ty_tok {
-	$$ = vlang::VLANG_TYPE::INT32;
+    $$ = vlang::VLANG_TYPE::INT32;
 }
 | double_ty_tok {
-	$$ = vlang::VLANG_TYPE::DOUBLE;
+    $$ = vlang::VLANG_TYPE::DOUBLE;
 }
 | string_ty_tok {
-	$$ = vlang::VLANG_TYPE::STRING;
+    $$ = vlang::VLANG_TYPE::STRING;
 }
 | void_ty_tok {
-	$$ = vlang::VLANG_TYPE::VOID;
+    $$ = vlang::VLANG_TYPE::VOID;
 }
 ;
 
 /* A chain of function arguments */
 ArgList: ArgList ',' Arg {
-	$$ = $1;
-	$$->push_back(*$3);
-	delete $3;
+    $$ = $1;
+    $$->push_back(*$3);
+    delete $3;
 }
 | Arg {
-	$$ = new std::vector<std::pair<vlang::VLANG_TYPE, std::string> >();
-	$$->push_back(*$1);
-	delete $1;
+    $$ = new std::vector<std::pair<vlang::VLANG_TYPE, std::string> >();
+    $$->push_back(*$1);
+    delete $1;
 }
 | {
-	$$ = new std::vector<std::pair<vlang::VLANG_TYPE, std::string> >();
+    $$ = new std::vector<std::pair<vlang::VLANG_TYPE, std::string> >();
 }
 ;
 
 /* A function argument */
 Arg: VlangType id_tok {
-	$$ = new std::pair<vlang::VLANG_TYPE, std::string>($1, *$2);
-	delete $2;
+    $$ = new std::pair<vlang::VLANG_TYPE, std::string>($1, *$2);
+    delete $2;
 }
 
 %%
 int main() {
-	/*yydebug = 1;*/
-	yyparse();
-	return 0;
+    /*yydebug = 1;*/
+    yyparse();
+    return 0;
 }
 
