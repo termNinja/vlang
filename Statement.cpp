@@ -7,7 +7,9 @@
 
 #include "Statement.hpp"
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 namespace vlang {
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 std::string indent_style = "    ";
 
@@ -50,7 +52,6 @@ std::string FunctionAST::dump(int level) const {
 // TODO: Multiple nested blocks are shown badly (because of indenting
 // as I wanted to avoid newline with '{' symbol.
 std::string BlockStmtAST::dump(int level) const {
-    //std::string res = getStrWithIndent(level) + "{\n";
     std::string res = "{\n";
     for (auto &cmd : m_cmds) {
         res += cmd->dump(level) + "\n";
@@ -84,13 +85,13 @@ std::string IfElseStmtAST::dump(int level) const {
     res += "if (";
     res += m_condExpr->dump() + ") ";
 
-    // if
+    // if part
     if (m_thenStmt->stmt_type() != STMT_TYPE::BLOCK)
         res += "\n" + m_thenStmt->dump(level+1);
     else
         res += m_thenStmt->dump(level+1);
 
-    // else
+    // else part
     if (m_thenStmt->stmt_type() != STMT_TYPE::BLOCK)
         res += "\n" + getStrWithIndent(level) + "else";
     else
@@ -105,12 +106,10 @@ std::string IfElseStmtAST::dump(int level) const {
 std::string WhileStmtAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
     res += "while (" + m_condExpr->dump() + ")";
-    if (m_bodyStmt->stmt_type() == STMT_TYPE::BLOCK) {
+    if (m_bodyStmt->stmt_type() == STMT_TYPE::BLOCK)
         res += " " + m_bodyStmt->dump(level+1);
-    } else {
+    else
         res += "\n" + getStrWithIndent(level+1) + m_bodyStmt->dump();
-    }
-
     return res;
 }
 
@@ -121,4 +120,6 @@ std::string AssignmentStmtAST::dump(int level) const {
     return res;
 }
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 } // ;vlang
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

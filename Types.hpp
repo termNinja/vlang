@@ -1,3 +1,10 @@
+/*
+ * Types.hpp
+ * Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
+ *
+ * Distributed under terms of the MIT license.
+ */
+
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
@@ -5,7 +12,9 @@
 #include <iostream>
 #include "LLVMCodegen.hpp"
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 namespace vlang {
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 typedef enum{
     INT32, INT64, DOUBLE, BOOL, STRING, VOID, NO_VAR_DECL
@@ -14,6 +23,7 @@ typedef enum{
 std::string to_str(VLANG_TYPE type);
 std::string to_str(Type* llvm_type);
 
+// NOTE
 // Classes are not yet utilized inside the compiler.
 // For now, I have decided to stick with a simple enum for types
 // because really, it's more then enough.
@@ -46,7 +56,8 @@ public:
     virtual VLANG_TYPE vlang_type() const;
 };
 
-
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 } //;vlang
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #endif /* ifndef TYPES_HPP */

@@ -1,4 +1,11 @@
 %{
+/*
+ * parser.ypp
+ * Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
+ *
+ * Distributed under terms of the MIT license.
+ */
+
 #include <iostream>
 #include <vector>
 #include <string>

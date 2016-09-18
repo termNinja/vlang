@@ -1,3 +1,10 @@
+/*
+ * Statement.hpp
+ * Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
+ *
+ * Distributed under terms of the MIT license.
+ */
+
 #ifndef STATEMENT_HPP
 #define STATEMENT_HPP
 
@@ -8,12 +15,17 @@
 #include <string>
 #include <vector>
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 namespace vlang {
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 typedef enum {
     RETURN, BLOCK, IF, IF_ELSE, WHILE, FOR, ASSIGNMENT, PROTOTYPE, FUNCTION, EXPRESSION, EMPTY
 } STMT_TYPE;
 
+/// -----------------------------------------------------------------------------------------------
+/// \brief An abstract statement class.
+/// -----------------------------------------------------------------------------------------------
 class StmtAST {
 public:
     virtual ~StmtAST() {}
@@ -21,6 +33,9 @@ public:
     virtual STMT_TYPE stmt_type() const = 0;
 };
 
+/// -----------------------------------------------------------------------------------------------
+/// \brief Represents a return statement.
+/// -----------------------------------------------------------------------------------------------
 class ReturnStmtAST : public StmtAST {
 public:
     ReturnStmtAST(ExprAST* retVal)
@@ -34,7 +49,9 @@ private:
     ExprAST* m_retVal;
 };
 
-/// \brief Represents a block expression.
+/// -----------------------------------------------------------------------------------------------
+/// \brief A block expression.
+/// -----------------------------------------------------------------------------------------------
 class BlockStmtAST : public StmtAST {
 public:
     BlockStmtAST(std::vector<StmtAST*> cmds)
@@ -51,10 +68,13 @@ private:
     std::vector<StmtAST*> m_cmds;
 };
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents the assignment statement.
+///
 /// If variable to which it's assigned is of type NO_VAR_DECL
 ///     it means that variable has already been declared and
 ///     we're assigning it a new value.
+/// -----------------------------------------------------------------------------------------------
 class AssignmentStmtAST : public StmtAST {
 public:
     AssignmentStmtAST(VLANG_TYPE type, std::string varName, ExprAST* expr)
@@ -72,7 +92,9 @@ private:
     ExprAST* m_expr;
 };
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents some constant evaluation (remove later)
+/// -----------------------------------------------------------------------------------------------
 class ExpressionStmtAST : public StmtAST {
 public:
     ExpressionStmtAST(ExprAST* expr)
@@ -92,7 +114,9 @@ public:
     STMT_TYPE stmt_type() const { return STMT_TYPE::EMPTY; }
 };
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents an if statement (with no else).
+/// -----------------------------------------------------------------------------------------------
 class IfStmtAST : public StmtAST {
 public:
     IfStmtAST(ExprAST* condExpr, StmtAST* thenStmt)
@@ -110,6 +134,9 @@ private:
     StmtAST* m_thenStmt;
 };
 
+/// -----------------------------------------------------------------------------------------------
+/// \brief Represents an if-then-else statement.
+/// -----------------------------------------------------------------------------------------------
 class IfElseStmtAST : public StmtAST {
 public:
     IfElseStmtAST(ExprAST* condExpr, StmtAST* thenStmt, StmtAST* elseStmt)
@@ -129,6 +156,9 @@ private:
     StmtAST* m_elseStmt;
 };
 
+/// -----------------------------------------------------------------------------------------------
+/// \brief Represents an while statement.
+/// -----------------------------------------------------------------------------------------------
 class WhileStmtAST : public StmtAST {
 public:
     WhileStmtAST(ExprAST* condExpr, StmtAST* bodyStmt)
@@ -159,7 +189,9 @@ private:
 //     std::string m_name;
 // };
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents a function declaration.
+/// -----------------------------------------------------------------------------------------------
 class PrototypeAST {
 public:
     PrototypeAST(std::string name, VLANG_TYPE retVal, std::vector<std::pair<VLANG_TYPE, std::string>> args)
@@ -176,7 +208,9 @@ private:
     std::vector<std::pair<VLANG_TYPE, std::string>> m_args;
 };
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents a function with a definition.
+/// -----------------------------------------------------------------------------------------------
 class FunctionAST {
 public:
     FunctionAST(PrototypeAST proto, BlockStmtAST* definition)
@@ -192,7 +226,9 @@ private:
     BlockStmtAST* m_definition;
 };
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 } // ;vlang
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #endif /* ifndef STATEMENT_HPP */
 

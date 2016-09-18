@@ -1,11 +1,22 @@
+/*
+ * TypeChecker.hpp
+ * Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
+ *
+ * Distributed under terms of the MIT license.
+ */
+
 #ifndef TYPE_CHECKER_HPP
 #define TYPE_CHECKER_HPP
 
 #include "Expression.hpp"
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 namespace vlang {
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-/// This class performs the type checking
+/// -----------------------------------------------------------------------------------------------
+/// \brief Performs the type checking.
+/// -----------------------------------------------------------------------------------------------
 class TypeChecker {
 public:
     static bool checkTypes(ExprAST* a, ExprAST* b) {
@@ -24,6 +35,8 @@ public:
     }
 };
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 } // ;vlang
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #endif /* ifndef TYPE_CHECKER_HPP */

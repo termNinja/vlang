@@ -1,8 +1,14 @@
 %option noyywrap
 %option nounput
 %option noinput
-
 %{
+/*
+ * lexer.lex
+ * Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
+ *
+ * Distributed under terms of the MIT license.
+ */
+
 #include <iostream>
 #include <cstdlib>
 #include <vector>

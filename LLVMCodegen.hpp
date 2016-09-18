@@ -1,3 +1,10 @@
+/*
+ * LLVMCodegen.hpp
+ * Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
+ *
+ * Distributed under terms of the MIT license.
+ */
+
 #ifndef LLVM_CODEGEN_HPP
 #define LLVM_CODEGEN_HPP
 

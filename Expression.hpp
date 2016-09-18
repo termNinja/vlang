@@ -1,16 +1,27 @@
+/*
+ * Expression.hpp
+ * Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
+ *
+ * Distributed under terms of the MIT license.
+ */
+
 #ifndef EXPRESSION_HPP
 #define EXPRESSION_HPP
 
-#include <boost/lexical_cast.hpp>
 #include <exception>
 #include <vector>
+#include <boost/lexical_cast.hpp>
 
 #include "LLVMCodegen.hpp"
 #include "Types.hpp"
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 namespace vlang {
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents an abstract expression.
+/// -----------------------------------------------------------------------------------------------
 class ExprAST {
 public:
     virtual ~ExprAST() {}
@@ -18,45 +29,54 @@ public:
     virtual VLANG_TYPE type() const = 0;
 };
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents an AST int const node.
 // TODO: Switch it to LONG LONG it in order to be able to represent smaller int types.
 // TODO: Allow signed, unsigned values
+/// -----------------------------------------------------------------------------------------------
 class ConstIntExprAST : public ExprAST {
 public:
     ConstIntExprAST(int val)
         : m_val(val)
     {}
-    virtual std::string dump(unsigned level = 0) const;
     int val() const { return m_val; }
-    VLANG_TYPE type() const { return VLANG_TYPE::INT32; }
+
+    virtual std::string dump(unsigned level = 0) const;
+    virtual VLANG_TYPE type() const { return VLANG_TYPE::INT32; }
 
 private:
     int m_val;
 };
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents an AST double const node.
+/// -----------------------------------------------------------------------------------------------
 class ConstDoubleExprAST : public ExprAST {
 public:
     ConstDoubleExprAST(double val)
         : m_val(val)
     {}
-    virtual std::string dump(unsigned level = 0) const;
     double val() const { return m_val; }
-    VLANG_TYPE type() const { return VLANG_TYPE::DOUBLE; }
+
+    virtual std::string dump(unsigned level = 0) const;
+    virtual VLANG_TYPE type() const { return VLANG_TYPE::DOUBLE; }
 
 private:
     double m_val;
     DoubleType* m_type;
 };
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents an AST variable node.
+/// -----------------------------------------------------------------------------------------------
 class VariableExprAST : public ExprAST {
 public:
     VariableExprAST(std::string name, VLANG_TYPE type)
         : m_name(name), m_type(type)
     {}
-    VLANG_TYPE type() const { return m_type; }
     std::string name() const { return m_name; }
+
+    virtual VLANG_TYPE type() const { return m_type; }
     virtual std::string dump(unsigned level = 0) const;
 
 private:
@@ -64,15 +84,17 @@ private:
     VLANG_TYPE m_type;
 };
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents an unary expression.
+/// -----------------------------------------------------------------------------------------------
 class UnaryExprAST : public ExprAST {
 public:
     UnaryExprAST(std::string operation, ExprAST* operand)
         : m_operation(operation), m_operand(operand)
     {}
     ~UnaryExprAST() { delete m_operand; }
-
     std::string operation() const { return m_operation; }
+
     virtual std::string dump(unsigned level = 0) const;
     virtual VLANG_TYPE type() const {
         return m_operand->type();
@@ -83,7 +105,9 @@ private:
     ExprAST* m_operand;
 };
 
+/// -----------------------------------------------------------------------------------------------
 /// \brief Represents an binary expression.
+/// -----------------------------------------------------------------------------------------------
 class BinaryExprAST : public ExprAST {
 public:
     BinaryExprAST(std::string operation, ExprAST* left, ExprAST* right)
@@ -94,6 +118,7 @@ public:
         delete m_right;
     }
     std::string operation() const { return m_operation; }
+
     virtual std::string dump(unsigned level = 0) const;
     virtual VLANG_TYPE type() const {
         if (m_left->type() == m_right->type())
@@ -112,22 +137,8 @@ private:
     ExprAST* m_right;
 };
 
-// @Deprecated
-// To be removed, prototypes are moved into Statement.hpp
-class PrototypeExprAST {
-public:
-    PrototypeExprAST(std::string name, std::vector<std::string> args)
-        : m_name(name), m_args(args)
-    {}
-    Value* codegen() const;
-    Int32Type type() const { return m_type; }
-
-private:
-    std::string m_name;
-    std::vector<std::string> m_args;
-    Int32Type m_type;
-};
-
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 } // ;vlang
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #endif /* ifndef EXPRESSION_HPP */
