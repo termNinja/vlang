@@ -8,7 +8,7 @@
 namespace vlang {
 
 typedef enum{
-	INT32, INT64, DOUBLE, BOOL, STRING, VOID, NO_VAR_DECL
+    INT32, INT64, DOUBLE, BOOL, STRING, VOID, NO_VAR_DECL
 }VLANG_TYPE;
 
 std::string to_str(VLANG_TYPE type);
@@ -19,31 +19,31 @@ std::string to_str(Type* llvm_type);
 // because really, it's more then enough.
 class VlangType {
 public:
-	virtual std::string str() const = 0;
-	virtual ~VlangType() {}
-	virtual Type* llvm_type() const = 0;
-	virtual VLANG_TYPE vlang_type() const = 0;
+    virtual std::string str() const = 0;
+    virtual ~VlangType() {}
+    virtual Type* llvm_type() const = 0;
+    virtual VLANG_TYPE vlang_type() const = 0;
 };
 
 class Int32Type : public VlangType {
 public:
-	virtual std::string str() const;
-	virtual Type* llvm_type() const;
-	virtual VLANG_TYPE vlang_type() const;
+    virtual std::string str() const;
+    virtual Type* llvm_type() const;
+    virtual VLANG_TYPE vlang_type() const;
 };
 
 class DoubleType : public VlangType {
 public:
-	virtual std::string str() const;
-	virtual Type* llvm_type() const;
-	virtual VLANG_TYPE vlang_type() const;
+    virtual std::string str() const;
+    virtual Type* llvm_type() const;
+    virtual VLANG_TYPE vlang_type() const;
 };
 
 class StringType : public VlangType {
 public:
-	virtual std::string str() const;
-	virtual Type* llvm_type() const;
-	virtual VLANG_TYPE vlang_type() const;
+    virtual std::string str() const;
+    virtual Type* llvm_type() const;
+    virtual VLANG_TYPE vlang_type() const;
 };
 
 

@@ -14,7 +14,7 @@ namespace boost{
 
 namespace vlang {
 
-std::string ConstIntExprAST::dump(unsigned level) const {
+std::string ConstIntExprAST::dump(unsigned) const {
 	//std::string res = "";
 	//unsigned tmplvl = level;
 	//while (tmplvl > 0) {
@@ -24,13 +24,12 @@ std::string ConstIntExprAST::dump(unsigned level) const {
 	return boost::lexical_cast<std::string>(m_val);
 }
 
-std::string ConstDoubleExprAST::dump(unsigned level) const {
+std::string ConstDoubleExprAST::dump(unsigned) const {
 	//std::string res = "";
 	//while (level > 0) res += "\t";
 	//res += boost::lexical_cast<std::string>(m_val);
 	return boost::lexical_cast<std::string>(m_val);
 }
-
 
 std::string UnaryExprAST::dump(unsigned level) const {
 	(void)level;
@@ -39,7 +38,7 @@ std::string UnaryExprAST::dump(unsigned level) const {
 
 std::string BinaryExprAST::dump(unsigned level) const {
 	(void)level;
-	return m_left->dump() + m_operation + m_right->dump();
+	return m_left->dump() + " " + m_operation + " " + m_right->dump();
 }
 
 std::string VariableExprAST::dump(unsigned level) const {

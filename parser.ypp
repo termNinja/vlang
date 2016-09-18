@@ -51,7 +51,7 @@ void yyerror(const std::string &err_msg) {
 
 %left '='
 %left '>' '<'
-%left '+' '-'
+%left '+' '-' '%'
 %left '*' '/'
 
 %token <int_val> int_val_tok
@@ -105,11 +105,11 @@ FunDefinition: FunDeclaration '{' Instructions '}' {
 ;
 
 /* A chain of instructions */
-Instructions: Instructions Instruction ';' {
+Instructions: Instructions Instruction {
 	$$ = $1;
 	$$->push_back($2);
 }
-| Instruction ';' {
+| Instruction {
 	$$ = new std::vector<vlang::StmtAST*>();
 	$$->push_back($1);
 }
@@ -117,18 +117,25 @@ Instructions: Instructions Instruction ';' {
 
 /* Instruction is what we write inside functions like function calls,
 return, expression evaluation etc. */
-Instruction: return_tok Expr {
+Instruction: return_tok Expr ';' {
 	$$ = new vlang::ReturnStmtAST($2);
 }
-| Expr {
+| Expr ';' {
 	$$ = new vlang::ExpressionStmtAST($1);
 }
-| id_tok '=' Expr {
+| id_tok '=' Expr ';' {
 	$$ = new vlang::AssignmentStmtAST(vlang::VLANG_TYPE::NO_VAR_DECL, *$1, $3);
 	delete $1;
 }
-| VlangType id_tok '=' Expr {
+| VlangType id_tok '=' Expr ';' {
 	$$ = new vlang::AssignmentStmtAST($1, *$2, $4);
+	delete $2;
+}
+| if_tok '(' Expr ')' Instruction {
+	$$ = new vlang::IfStmtAST($3, $5);
+}
+| '{' Instructions '}' {
+	$$ = new vlang::BlockStmtAST(*$2);
 	delete $2;
 }
 ;

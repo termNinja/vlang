@@ -16,21 +16,21 @@ std::unique_ptr<legacy::FunctionPassManager> TheFPM;
 Function* mainFunction = nullptr;
 
 void initializeModuleAndPassManager() {
-	TheModule = make_unique<Module>("VLANG MODULE", TheContext);
-	TheFPM = make_unique<legacy::FunctionPassManager>(TheModule.get());
-	TheFPM->doInitialization();
+    TheModule = make_unique<Module>("VLANG MODULE", TheContext);
+    TheFPM = make_unique<legacy::FunctionPassManager>(TheModule.get());
+    TheFPM->doInitialization();
 }
 
 AllocaInst* CreateEntryBlockAllocaInt32(Function* TheFunction, const std::string& name) {
-	IRBuilder<> b(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
-	return b.CreateAlloca(Type::getInt32Ty(TheContext), 0, name.c_str());
+    IRBuilder<> b(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
+    return b.CreateAlloca(Type::getInt32Ty(TheContext), 0, name.c_str());
 }
 
 AllocaInst* CreateEntryBlockAllocaInt64(Function* TheFunction, const std::string& name) {
-	IRBuilder<> b(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
-	return b.CreateAlloca(Type::getInt64Ty(TheContext), 0, name.c_str());
+    IRBuilder<> b(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
+    return b.CreateAlloca(Type::getInt64Ty(TheContext), 0, name.c_str());
 }
 AllocaInst* CreateEntryBlockAllocaDouble(Function* TheFunction, const std::string& name) {
-	IRBuilder<> b(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
-	return b.CreateAlloca(Type::getDoubleTy(TheContext), 0, name.c_str());
+    IRBuilder<> b(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
+    return b.CreateAlloca(Type::getDoubleTy(TheContext), 0, name.c_str());
 }
