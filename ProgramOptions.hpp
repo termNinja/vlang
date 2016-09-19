@@ -14,8 +14,10 @@
 #include <string>
 #include <iostream>
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 namespace vlang {
 namespace util {
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 /// -------------------------------------------------------------------------------------
 /// \brief Singleton class that contains compiler options.
@@ -41,6 +43,9 @@ public:
     /// TODO: Make this less risky maybe?
     bool contains_input_files() const;
 
+    /// \brief Emmits the parsed source code to stdout.
+    bool emit_source() const;
+
     /// \brief Returns the first input file given in program options.
     std::string first_input_file() const;
 
@@ -61,7 +66,9 @@ private:
     static bool is_init;
 };
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 } // ;util 
 } // ;vlang
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #endif /* !PROGRAMOPTIONS_HPP */

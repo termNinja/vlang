@@ -7,13 +7,21 @@
 
 #include "LLVMCodegen.hpp"
 
+#include <iostream>
+
 std::unique_ptr<Module> TheModule;
 LLVMContext TheContext;
 std::map<std::string, AllocaInst*> NamedValues;
-IRBuilder<> builder(TheContext);
+std::map<std::string, GlobalVariable*> GlobalValues;
+IRBuilder<> Builder(TheContext);
 std::unique_ptr<legacy::FunctionPassManager> TheFPM;
 
 Function* mainFunction = nullptr;
+
+Value* logError(std::string err_msg) {
+    std::cerr << err_msg << std::endl;
+    return nullptr;
+}
 
 void initializeModuleAndPassManager() {
     TheModule = make_unique<Module>("VLANG MODULE", TheContext);

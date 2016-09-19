@@ -28,9 +28,9 @@ public:
     static bool checkTypesWithDiagnostics(ExprAST* a, ExprAST* b) {
         if (a->type() == b->type())
             return true;
-        std::cerr << "Operand 1 has type: " << to_str(a->type()) << std::endl;
-        std::cerr << "Operand 2 has type: " << to_str(b->type()) << std::endl;
-        std::cerr << "Type mismatch detected." << std::endl;
+        //std::cerr << "Operand 1 has type: " << (a->type() == nullptr ? "VOID" : a->type()->str()) << std::endl;
+        //std::cerr << "Operand 2 has type: " << (b->type() == nullptr ? "VOID" : b->type()->str()) << std::endl;
+        //std::cerr << "Type mismatch detected." << std::endl;
         return false;
     }
 };

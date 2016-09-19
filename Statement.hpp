@@ -19,8 +19,12 @@
 namespace vlang {
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+/// -----------------------------------------------------------------------------------------------
+/// \brief Used to fast discover a class type in class hierarchy.
+/// -----------------------------------------------------------------------------------------------
 typedef enum {
-    RETURN, BLOCK, IF, IF_ELSE, WHILE, FOR, ASSIGNMENT, ASSIGNMENT_LIST, PROTOTYPE, FUNCTION, EXPRESSION, EMPTY
+    RETURN, BLOCK, IF, IF_ELSE, WHILE, FOR, ASSIGNMENT,
+    ASSIGNMENT_LIST, PROTOTYPE, FUNCTION, EXPRESSION, EMPTY
 } STMT_TYPE;
 
 /// -----------------------------------------------------------------------------------------------
@@ -29,7 +33,11 @@ typedef enum {
 class StmtAST {
 public:
     virtual ~StmtAST() {}
+
+    /// \brief Returns a string representation of Vala statement.
     virtual std::string dump(int level = 0) const = 0;
+
+    /// \brief Returns an enum representing the type of statement inside class hierarchy.
     virtual STMT_TYPE stmt_type() const = 0;
 };
 
@@ -209,7 +217,7 @@ private:
 /// -----------------------------------------------------------------------------------------------
 /// \brief Represents a function declaration.
 /// -----------------------------------------------------------------------------------------------
-class PrototypeAST {
+class PrototypeAST : public StmtAST {
 public:
     PrototypeAST(std::string name, VLANG_TYPE retVal, std::vector<std::pair<VLANG_TYPE, std::string>> args)
         : m_name(name), m_retVal(retVal), m_args(args)
@@ -228,7 +236,7 @@ private:
 /// -----------------------------------------------------------------------------------------------
 /// \brief Represents a function with a definition.
 /// -----------------------------------------------------------------------------------------------
-class FunctionAST {
+class FunctionAST : public StmtAST {
 public:
     FunctionAST(PrototypeAST proto, BlockStmtAST* definition)
         : m_proto(proto), m_definition(definition)

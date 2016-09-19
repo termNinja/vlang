@@ -20,15 +20,21 @@ ProgramOptions& ProgramOptions::get() {
 }
 
 const std::vector<std::string>& ProgramOptions::input() const {
-    return m_vm["input-file"].as< std::vector<std::string> >();
+    return m_vm["input-file"].as<std::vector<std::string>>();
 }
 
 std::string ProgramOptions::first_input_file() const {
-    return m_vm["input-file"].as< std::vector<std::string> >()[0];
+    return m_vm["input-file"].as<std::vector<std::string>>()[0];
 }
 
 bool ProgramOptions::contains_input_files() const {
     if (m_vm.count("input-file"))
+        return true;
+    else return false;
+}
+
+bool ProgramOptions::emit_source() const {
+    if (m_vm.count("emit-source"))
         return true;
     else return false;
 }
@@ -57,6 +63,7 @@ void ProgramOptions::init(int argc, char** argv) {
         //("optimization", opt::value<std::string>()->default_value(""), "optimization level")
         ("input-file,i", opt::value<std::vector<std::string> >(), "input .vala file")
         ("output,o", opt::value<std::string>()->default_value("a.out"), " executable output path and name")
+        ("emit-source,s", opt::value<bool>()->default_value(false), " shows the parsed source code")
     ;
 
     // Let's make any given unspecified argument as input file

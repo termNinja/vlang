@@ -35,13 +35,15 @@ using namespace llvm;
 extern std::unique_ptr<Module> TheModule;
 extern LLVMContext TheContext;
 extern std::map<std::string, AllocaInst*> NamedValues;
-extern IRBuilder<> builder;
+extern std::map<std::string, GlobalVariable*> GlobalValues;
+extern IRBuilder<> Builder;
 extern std::unique_ptr<legacy::FunctionPassManager> TheFPM;
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // Helper functions
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 void InitializeModuleAndPassManager();
+Value* logError(std::string err_msg);
 AllocaInst* CreateEntryBlockAllocaInt32(Function* TheFunction, const std::string& name);
 AllocaInst* CreateEntryBlockAllocaInt64(Function* TheFunction, const std::string& name);
 AllocaInst* CreateEntryBlockAllocaIntDouble(Function* TheFunction, const std::string& name);

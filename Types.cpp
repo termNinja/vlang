@@ -11,6 +11,9 @@
 namespace vlang {
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+
+std::stack<std::map<std::string, VLANG_TYPE>> LocalVariableScopeType;
+
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // INT32
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -26,6 +29,9 @@ Type* Int32Type::llvm_type() const {
     return LLVM_INTTY;
 }
 
+int Int32Type::strength() const {
+    return 10;
+}
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // DOUBLE TYPE
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -41,6 +47,9 @@ Type* DoubleType::llvm_type() const {
     return LLVM_DOUBLETY;
 }
 
+int DoubleType::strength() const {
+    return 20;
+}
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // STRING TYPE
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -57,6 +66,9 @@ VLANG_TYPE StringType::vlang_type() const {
     return VLANG_TYPE::STRING;
 }
 
+int StringType::strength() const {
+    return 30;
+}
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // UTILS
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -86,6 +98,20 @@ std::string to_str(Type* llvm_type) {
         return "double";
     else
         return "unknown_type";
+}
+
+VlangType* make_from_enum(VLANG_TYPE type) {
+    switch (type) {
+        case VLANG_TYPE::INT32:
+            return new Int32Type();
+        case VLANG_TYPE::DOUBLE:
+            return new DoubleType();
+        case VLANG_TYPE::STRING:
+            return new StringType();
+        default:
+            std::cerr << "What is this type? " << to_str(type) << std::endl;
+            return nullptr;
+    }
 }
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
