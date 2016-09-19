@@ -20,7 +20,7 @@ namespace vlang {
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 typedef enum {
-    RETURN, BLOCK, IF, IF_ELSE, WHILE, FOR, ASSIGNMENT, PROTOTYPE, FUNCTION, EXPRESSION, EMPTY
+    RETURN, BLOCK, IF, IF_ELSE, WHILE, FOR, ASSIGNMENT, ASSIGNMENT_LIST, PROTOTYPE, FUNCTION, EXPRESSION, EMPTY
 } STMT_TYPE;
 
 /// -----------------------------------------------------------------------------------------------
@@ -90,6 +90,23 @@ private:
     VLANG_TYPE m_type;
     std::string m_varName;
     ExprAST* m_expr;
+};
+
+class AssignmentListStmtAST : public StmtAST {
+public:
+    AssignmentListStmtAST (VLANG_TYPE type, std::vector<std::pair<std::string, ExprAST*>> assignmentList)
+        : m_type(type), m_list(assignmentList)
+    {}
+    ~AssignmentListStmtAST () {
+        for (auto &elem : m_list)
+            delete elem.second;
+    }
+    std::string dump(int level = 0) const;
+    STMT_TYPE stmt_type() const { return STMT_TYPE::ASSIGNMENT_LIST; }
+
+private:
+    VLANG_TYPE m_type;
+    std::vector<std::pair<std::string, ExprAST*>> m_list;
 };
 
 /// -----------------------------------------------------------------------------------------------

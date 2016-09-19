@@ -33,24 +33,34 @@ CLOC = $(shell type -p cloc || echo wc -l)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 $(PROGRAM): lex.yy.o parser.tab.o LLVMCodegen.o Expression.o Types.o Statement.o ProgramOptions.o
 	$(CXX) -o $@ $^ $(LDFLAGS) $(BOOST)
+	@echo
 parser.tab.o: parser.tab.cpp parser.tab.hpp LLVMCodegen.hpp Types.hpp Expression.hpp TypeChecker.hpp Statement.hpp ProgramOptions.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
+	@echo
 parser.tab.cpp parser.tab.hpp: parser.ypp
 	bison -d -v $<
+	@echo
 lex.yy.o: lex.yy.c parser.tab.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
+	@echo
 lex.yy.c: lexer.lex
 	flex $<
+	@echo
 LLVMCodegen.o: LLVMCodegen.cpp LLVMCodegen.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
+	@echo
 Expression.o: Expression.cpp Expression.hpp LLVMCodegen.hpp Types.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
+	@echo
 Types.o: Types.cpp Types.hpp LLVMCodegen.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
+	@echo
 Statement.o: Statement.cpp Statement.hpp Expression.hpp LLVMCodegen.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
+	@echo
 ProgramOptions.o: ProgramOptions.cpp ProgramOptions.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
+	@echo
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

@@ -67,6 +67,7 @@ std::string ExpressionStmtAST::dump(int level) const {
 }
 
 std::string EmptyStmtAST::dump(int) const {
+    std::cerr << "EMPTY STATEMENT!" << std::endl;
     return ";";
 }
 
@@ -117,6 +118,23 @@ std::string AssignmentStmtAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
     if (m_type != VLANG_TYPE::NO_VAR_DECL) res += to_str(m_type) + " ";
     res += m_varName + " = " + m_expr->dump() + ";";
+    return res;
+}
+
+std::string AssignmentListStmtAST::dump(int level) const {
+    std::string res = getStrWithIndent(level);
+    res += to_str(m_type) + " ";
+    if (m_list.empty())
+        return "Error, assignment list is empty!";
+    unsigned i = 0;
+    for (; i < m_list.size()-1; ++i) {
+        if (m_list[i].second == nullptr)
+            res += m_list[i].first + ", ";
+        else
+            res += m_list[i].first + " = " + m_list[i].second->dump() + ", ";
+    }
+    if (m_list[i].second == nullptr) res += m_list[i].first + ";";
+    else res += m_list[i].first + " = " + m_list[i].second->dump() + ";";
     return res;
 }
 

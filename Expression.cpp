@@ -24,6 +24,10 @@ std::string ConstDoubleExprAST::dump(unsigned) const {
     return boost::lexical_cast<std::string>(m_val);
 }
 
+std::string StringExprAST::dump(unsigned) const {
+    return "\"" + m_str + "\"";
+}
+
 std::string UnaryExprAST::dump(unsigned) const {
     return m_operation + m_operand->dump();
 }

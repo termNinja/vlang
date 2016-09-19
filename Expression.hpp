@@ -66,6 +66,20 @@ private:
     DoubleType* m_type;
 };
 
+class StringExprAST : public ExprAST {
+public:
+    StringExprAST(std::string str)
+        : m_str(str)
+    {}
+    std::string val() const { return m_str; }
+
+    virtual std::string dump(unsigned level = 0) const;
+    virtual VLANG_TYPE type() const { return VLANG_TYPE::STRING; }
+
+private:
+    std::string m_str;
+};
+
 /// -----------------------------------------------------------------------------------------------
 /// \brief Represents an AST variable node.
 /// -----------------------------------------------------------------------------------------------

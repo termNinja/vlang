@@ -55,6 +55,9 @@ void yyerror(const std::string &err_msg) {
     // Other
     std::vector<std::pair<vlang::VLANG_TYPE, std::string> >* vec_pair_type_name;
     std::pair<vlang::VLANG_TYPE, std::string>* pair_type_name;
+
+    std::pair<std::string, vlang::ExprAST*>* pair_str_expr;
+    std::vector<std::pair<std::string, vlang::ExprAST*>>* vec_pair_str_expr;
     vlang::VLANG_TYPE vtype;
 }
 
@@ -77,6 +80,9 @@ void yyerror(const std::string &err_msg) {
 
 %type <pair_type_name> Arg
 %type <vec_pair_type_name> ArgList
+
+%type <pair_str_expr> Assignment
+%type <vec_pair_str_expr> Assignments
 
 %type <vec_stmt> Instructions
 %type <stmt> Instruction
@@ -133,12 +139,18 @@ Instruction: return_tok Expr ';' {
 | Expr ';' {
     $$ = new vlang::ExpressionStmtAST($1);
 }
+/* Changed with Assignments (more abstract)
 | id_tok '=' Expr ';' {
     $$ = new vlang::AssignmentStmtAST(vlang::VLANG_TYPE::NO_VAR_DECL, *$1, $3);
     delete $1;
 }
 | VlangType id_tok '=' Expr ';' {
     $$ = new vlang::AssignmentStmtAST($1, *$2, $4);
+    delete $2;
+}
+*/
+| VlangType Assignments ';' {
+    $$ = new vlang::AssignmentListStmtAST($1, *$2);
     delete $2;
 }
 | if_tok '(' Expr ')' Instruction {
@@ -196,12 +208,36 @@ Expr: '(' Expr ')' {
 | double_val_tok {
     $$ = new vlang::ConstDoubleExprAST($1);
 }
+| str_val_tok {
+    $$ = new vlang::StringExprAST(*$1);
+    delete $1;
+}
 | id_tok {
     $$ = new vlang::VariableExprAST(*$1, vlang::VLANG_TYPE::VOID);
     delete $1;
 }
 ;
 
+/* Making assignment list */
+Assignments: Assignments ',' Assignment {
+    $$ = $1;
+    $$->push_back(*$3);
+    delete $3;
+}
+| Assignment {
+    $$ = new std::vector<std::pair<std::string, vlang::ExprAST*>>();
+    $$->push_back(*$1);
+    delete $1;
+};
+
+Assignment: id_tok '=' Expr {
+    $$ = new std::pair<std::string, vlang::ExprAST*>(*$1, $3);
+    delete $1;
+}
+| id_tok {
+    $$ = new std::pair<std::string, vlang::ExprAST*>(*$1, nullptr);
+    delete $1;
+}
 
 /* What kind of types are supported */
 VlangType: int_ty_tok {
