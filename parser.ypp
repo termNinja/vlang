@@ -95,7 +95,7 @@ void yyerror(const std::string &err_msg) {
 %%
 TheProgram: Program {
     if (vlang::util::ProgramOptions::get().emit_source()) {
-        std::cout << << std::endl << DRAGON_SEPARATOR() << std::endl;
+        std::cout << std::endl << DRAGON_SEPARATOR() << std::endl;
         std::cout << "parsed source:" << std::endl;
         std::cout << DRAGON_SEPARATOR() << std::endl;
         for (auto &stmt : *$1)
