@@ -70,7 +70,7 @@ In order to build the project, make sure to have:
 - [x] add compiler options (for example ```vlang main.vala point.vala -o geometry```)
 
 ## Running vlang
-```bash
+```
 $ ./vlang --help
 All options:
     --help                          produce help message
@@ -82,7 +82,7 @@ All options:
 For developing/debugging purposes, source will always be emited at the moment.
 You can run vlang without input files and it will start in interpret mode.
 
-```bash
+```
 ********************************************************
 Input: 
 * tests/01_simple.vala
