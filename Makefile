@@ -21,9 +21,9 @@
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 PROGRAM = vlang
 CXX = clang++
-CXXFLAGS = -g $(shell llvm-config --cxxflags)
+CXXFLAGS = -g $(shell llvm-config --cxxflags) -fexceptions
 LDFLAGS = $(shell llvm-config --ldflags --system-libs --libs core native mcjit)
-BOOST = -DBOOST_NO_EXCEPTIONS -DBOOST_NO_EXCEPTION_STD_NAMESPACE -L /usr/lib/ -lm -lboost_program_options
+BOOST = -DBOOST_NO_EXCEPTIONS -DBOOST_NO_EXCEPTION_STD_NAMESPACE -L /usr/lib/ -lm -lboost_program_options -fexceptions
 FILES = Makefile parser.ypp lexer.lex Statement.hpp Statement.cpp \
 	Expression.hpp Expression.cpp LLVMCodegen.hpp LLVMCodegen.cpp TypeChecker.hpp \
 	Types.hpp Types.cpp
@@ -31,10 +31,12 @@ CLOC = $(shell type -p cloc || echo wc -l)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-$(PROGRAM): lex.yy.o parser.tab.o LLVMCodegen.o Expression.o Types.o Statement.o ProgramOptions.o
+$(PROGRAM): lex.yy.o parser.tab.o LLVMCodegen.o Expression.o Types.o Statement.o \
+			ProgramOptions.o GlobalContainers.o
 	$(CXX) -o $@ $^ $(LDFLAGS) $(BOOST)
 	@echo
-parser.tab.o: parser.tab.cpp parser.tab.hpp LLVMCodegen.hpp Types.hpp Expression.hpp TypeChecker.hpp Statement.hpp ProgramOptions.hpp
+parser.tab.o: 	parser.tab.cpp parser.tab.hpp LLVMCodegen.hpp Types.hpp Expression.hpp \
+				TypeChecker.hpp Statement.hpp ProgramOptions.hpp GlobalContainers.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	@echo
 parser.tab.cpp parser.tab.hpp: parser.ypp
@@ -61,6 +63,9 @@ Statement.o: Statement.cpp Statement.hpp Expression.hpp LLVMCodegen.hpp
 ProgramOptions.o: ProgramOptions.cpp ProgramOptions.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	@echo
+GlobalContainers.o: GlobalContainers.cpp GlobalContainers.hpp
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
+	@echo
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -81,5 +86,5 @@ author:
 	@echo "Created by: Nemanja Micovic"
 
 lines:
-	@$(CLOC) *
+	@$(CLOC) $(FILES)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

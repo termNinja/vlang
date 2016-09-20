@@ -214,10 +214,16 @@ private:
 //     std::string m_name;
 // };
 
+/// \brief This class is a simple placeholder for both PrototypeAST and FunctionAST.
+class ProtoDefContainer : public StmtAST {
+public:
+    virtual std::string name() const = 0;
+};
+
 /// -----------------------------------------------------------------------------------------------
 /// \brief Represents a function declaration.
 /// -----------------------------------------------------------------------------------------------
-class PrototypeAST : public StmtAST {
+class PrototypeAST : public ProtoDefContainer {
 public:
     PrototypeAST(std::string name, VLANG_TYPE retVal, std::vector<std::pair<VLANG_TYPE, std::string>> args)
         : m_name(name), m_retVal(retVal), m_args(args)
@@ -236,7 +242,7 @@ private:
 /// -----------------------------------------------------------------------------------------------
 /// \brief Represents a function with a definition.
 /// -----------------------------------------------------------------------------------------------
-class FunctionAST : public StmtAST {
+class FunctionAST : public ProtoDefContainer {
 public:
     FunctionAST(PrototypeAST proto, BlockStmtAST* definition)
         : m_proto(proto), m_definition(definition)
@@ -244,6 +250,7 @@ public:
     ~FunctionAST() { delete m_definition; }
     const PrototypeAST& proto() const { return m_proto; }
     std::string dump(int level = 0) const;
+    std::string name() const { return m_proto.name(); }
     STMT_TYPE stmt_type() const { return STMT_TYPE::FUNCTION; }
 
 private:

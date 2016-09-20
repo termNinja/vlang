@@ -6,6 +6,7 @@
  */
 
 #include "Expression.hpp"
+#include "GlobalContainers.hpp"
 
 // Required in order to use lexical cast
 namespace boost{
@@ -48,6 +49,10 @@ Value* UnaryExprAST::codegen() const {
 Value* BinaryExprAST::codegen() const {
     // TODO: Finish this once I complete semantic analysis.
 
+    return nullptr;
+}
+
+Value* FunctionCallExprAST::codegen() const {
     return nullptr;
 }
 
@@ -122,7 +127,24 @@ std::string BinaryExprAST::dump(unsigned) const {
 
 std::string VariableExprAST::dump(unsigned) const {
     return boost::lexical_cast<std::string>(m_name);
-};
+}
+
+std::string FunctionCallExprAST::dump(unsigned) const {
+    // We try to find the function
+    ProtoDefContainer* ZiFunction = FunctionContainer[m_name];
+    unsigned i = 0;
+    if (ZiFunction == nullptr) {
+        std::cout << "Failed finding function '" << m_name << "'" << std::endl;
+        return "";
+    } else {
+        std::string res = ZiFunction->name() + "(";
+        if (m_args.empty()) return res += ")";
+        for (; i < m_args.size()-1; ++i)
+            res += m_args[i]->dump() + ", ";
+        res += m_args[i]->dump() + ")";
+        return res;
+    }
+}
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 } // ;vlang

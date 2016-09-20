@@ -40,7 +40,7 @@ std::string PrototypeAST::dump(int level) const {
     }
     res += ");";
     return res;
-};
+}
 
 std::string FunctionAST::dump(int level) const {
     std::string res = m_proto.dump(level);

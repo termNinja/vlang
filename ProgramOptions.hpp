@@ -52,6 +52,9 @@ public:
     /// \brief Returns the executable path and name
     std::string output_path() const;
 
+    /// \brief Returns a string which shows the state of program options.
+    std::string show_state() const;
+
 private:
     ProgramOptions() {}
     ProgramOptions(const ProgramOptions&) = delete;

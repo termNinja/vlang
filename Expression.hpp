@@ -23,7 +23,7 @@ namespace vlang {
 /// \brief Used to fast discover a class type in class hierarchy.
 /// -----------------------------------------------------------------------------------------------
 typedef enum {
-    INT_EXP, DOUBLE_EXP, STRING_EXP, VARIABLE_EXP, BINARY_EXP, UNARY_EXP
+    INT_EXP, DOUBLE_EXP, STRING_EXP, VARIABLE_EXP, BINARY_EXP, UNARY_EXP, CALL_EXP
 } EXP_TYPE;
 
 /// -----------------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ public:
     virtual Value* codegen() const;
     virtual EXP_TYPE exp_type() const { return EXP_TYPE::DOUBLE_EXP; }
     virtual ExprAST* promote(VLANG_TYPE type) {
-        if (type == VLANG_TYPE::INT32 || type == VLANG_TYPE::DOUBLE) 
+        if (type == VLANG_TYPE::INT32 || type == VLANG_TYPE::DOUBLE)
             return nullptr;     // no promotion needed
         else if (type == VLANG_TYPE::STRING)
             return new StringExprAST(std::to_string(m_val));
@@ -181,6 +181,27 @@ public:
 private:
     std::string m_name;
     VlangType* m_type;
+};
+
+/// -----------------------------------------------------------------------------------------------
+/// \brief Represents a function call expression.
+/// -----------------------------------------------------------------------------------------------
+class FunctionCallExprAST : public ExprAST {
+public:
+    FunctionCallExprAST(std::string name, std::vector<ExprAST*> args)
+        : m_name(name), m_args(args)
+    {}
+    virtual std::string dump(unsigned level = 0) const;
+    virtual const VlangType* type() const { return nullptr; }
+    virtual Value* codegen() const;
+    virtual EXP_TYPE exp_type() const { return EXP_TYPE::CALL_EXP; }
+    virtual ExprAST* promote(VLANG_TYPE type) {
+        return nullptr;
+    }
+
+private:
+    std::string m_name;
+    std::vector<ExprAST*> m_args;
 };
 
 /// -----------------------------------------------------------------------------------------------

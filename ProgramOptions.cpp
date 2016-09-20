@@ -7,6 +7,9 @@
 
 #include "ProgramOptions.hpp"
 
+#include <sstream>
+#include <iomanip>
+
 namespace opt = boost::program_options;
 
 namespace vlang {
@@ -51,6 +54,29 @@ std::string ProgramOptions::output_path() const {
     return m_vm["output"].as<std::string>();
 }
 
+std::string ProgramOptions::show_state() const {
+    std::stringstream ss;
+    std::string separator = "********************************************************\n";
+
+    // Showing input
+    ss << separator;
+    
+    ss << "Input: ";
+    if (contains_input_files()) {
+        ss << std::endl;
+        for (auto &a : input())
+            ss << "* " << a << std::endl;
+    } else {
+        ss << "stdin" << std::endl;
+    }
+
+    // Showing output
+    ss << "Output: " << output_path() << std::endl;
+
+    ss << separator << std::endl;
+    return ss.str();
+}
+
 void ProgramOptions::init(int argc, char** argv) {
     if (ProgramOptions::get().is_init) {
         std::cerr << "Warning! Detected multiple init of ProgramOptions!" << std::endl;
@@ -74,7 +100,12 @@ void ProgramOptions::init(int argc, char** argv) {
 
     // TODO: Handle the cases when we are passed a dumb argument.
     // It seems LLVM has turned off exceptions which I need in order to acomplish this.
-    opt::store(opt::command_line_parser(argc, argv).options(desc).positional(po_desc).run(), vm);
+    try {
+        opt::store(opt::command_line_parser(argc, argv).options(desc).positional(po_desc).run(), vm);
+    } catch (...) {
+        std::cout << desc << std::endl;
+        exit(0);
+    }
 
     opt::notify(vm);
     if (vm.count("help")) {

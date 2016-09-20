@@ -10,7 +10,6 @@
 
 #include <string>
 #include <iostream>
-#include <stack>
 #include "LLVMCodegen.hpp"
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -23,9 +22,6 @@ typedef enum{
 
 std::string to_str(VLANG_TYPE type);
 std::string to_str(Type* llvm_type);
-
-// TODO: Update this map from code (when block begins, open scope, when block ends, clear scope)
-extern std::stack<std::map<std::string, VLANG_TYPE>> LocalVariableScopeType;
 
 // NOTE
 // Classes are not yet utilized inside the compiler.
