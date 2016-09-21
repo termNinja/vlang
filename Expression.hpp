@@ -50,8 +50,16 @@ public:
     ///
     /// NOTE: Still working on it.
     virtual ExprAST* promote(VLANG_TYPE type) = 0;
+
+    /// \brief Performs casting of given node into a given type.
+    /// What happens with binary expressions? Casts both operands into given type.
+    virtual ExprAST* convertTo(VLANG_TYPE type) = 0;
+
+    /// \brief Returns a clone of the current node (recursively clones)
+    virtual ExprAST* clone() const = 0;
 };
 
+// TODO: Still to make a decision on this
 std::pair<int, VLANG_TYPE> DetermineExpressionConversion(const ExprAST* left, const ExprAST* right);
 
 /// -----------------------------------------------------------------------------------------------
@@ -72,8 +80,11 @@ public:
     virtual Value* codegen() const;
     virtual EXP_TYPE exp_type() const { return EXP_TYPE::STRING_EXP; }
     virtual ExprAST* promote(VLANG_TYPE type) {
+        // TODO
         return nullptr;
     }
+    virtual ExprAST* convertTo(VLANG_TYPE type);
+    virtual ExprAST* clone() const;
 
 private:
     std::string m_str;
@@ -108,6 +119,8 @@ public:
             return nullptr;
         }
     }
+    virtual ExprAST* convertTo(VLANG_TYPE type);
+    virtual ExprAST* clone() const;
 
 private:
     double m_val;
@@ -144,9 +157,36 @@ public:
             return this;
         }
     }
+    virtual ExprAST* convertTo(VLANG_TYPE type);
+    virtual ExprAST* clone() const;
 
 private:
     int m_val;
+    VlangType* m_type;
+};
+
+class BoolExprAST : public ExprAST {
+public:
+    BoolExprAST(bool val)
+        : m_val(val), m_type(new BoolType())
+    {}
+    ~BoolExprAST() {
+        delete m_type;
+    }
+    bool val() const { return m_val; }
+
+    virtual std::string dump(unsigned level = 0) const;
+    virtual const VlangType* type() const { return m_type; }
+    virtual Value* codegen() const;
+    virtual EXP_TYPE exp_type() const { return EXP_TYPE::STRING_EXP; }
+    virtual ExprAST* promote(VLANG_TYPE type) {
+        return nullptr;
+    }
+    virtual ExprAST* convertTo(VLANG_TYPE type);
+    virtual ExprAST* clone() const;
+
+private:
+    bool m_val;
     VlangType* m_type;
 };
 
@@ -162,7 +202,8 @@ public:
         : m_name(name)
     {}
     ~VariableExprAST() {
-        delete m_type;
+        // TODO: actaully read the type from somewhere
+//        delete m_type;
     }
     std::string name() const { return m_name; }
 
@@ -177,6 +218,8 @@ public:
             return nullptr;
         }
     }
+    virtual ExprAST* convertTo(VLANG_TYPE type);
+    virtual ExprAST* clone() const;
 
 private:
     std::string m_name;
@@ -198,6 +241,8 @@ public:
     virtual ExprAST* promote(VLANG_TYPE type) {
         return nullptr;
     }
+    virtual ExprAST* convertTo(VLANG_TYPE type);
+    virtual ExprAST* clone() const;
 
 private:
     std::string m_name;
@@ -225,6 +270,8 @@ public:
         // TODO: later
         return nullptr;
     }
+    virtual ExprAST* convertTo(VLANG_TYPE type);
+    virtual ExprAST* clone() const;
 
 private:
     std::string m_op;
@@ -250,6 +297,8 @@ public:
     virtual std::string dump(unsigned level = 0) const;
     virtual Value* codegen() const;
     virtual ExprAST* promote(VLANG_TYPE type);
+    virtual ExprAST* convertTo(VLANG_TYPE type);
+    virtual ExprAST* clone() const;
 
 private:
     std::string m_op;

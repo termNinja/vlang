@@ -6,6 +6,7 @@
  */
 
 #include "Statement.hpp"
+#include "SemanticAnalyzer.hpp"
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 namespace vlang {
@@ -23,6 +24,29 @@ std::string getStrWithIndent(int level = 0) {
     return res;
 }
 
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// Checking if assignment is valid
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+bool AssignmentStmtAST::isAllowed() const {
+    return semant::SemanticAnalyzer::isAllowedAssignment(m_type, m_expr->type()->vlang_type());
+}
+
+std::unique_ptr<std::vector<bool>> AssignmentListStmtAST::isAllowed() const {
+    std::unique_ptr<std::vector<bool>> result(new std::vector<bool>());
+
+    for (auto &ass : m_list) {
+        if (semant::SemanticAnalyzer::isAllowedAssignment(m_type, ass.second->type()->vlang_type()))
+            result->push_back(true);
+        else 
+            result->push_back(false);
+    }
+
+    return result;
+}
+
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// Dump functions
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 std::string ReturnStmtAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
     res += "return " + m_retVal->dump() + ";";

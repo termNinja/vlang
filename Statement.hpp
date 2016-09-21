@@ -71,6 +71,7 @@ public:
     std::string dump(int level = 0) const;
     VLANG_TYPE type() const { return VLANG_TYPE::VOID; }
     STMT_TYPE stmt_type() const { return STMT_TYPE::BLOCK; }
+    const std::vector<StmtAST*>& blockStatements() const { return m_cmds; }
 
 private:
     std::vector<StmtAST*> m_cmds;
@@ -93,6 +94,7 @@ public:
     }
     std::string dump(int level = 0) const;
     STMT_TYPE stmt_type() const { return STMT_TYPE::ASSIGNMENT; }
+    bool isAllowed() const;
 
 private:
     VLANG_TYPE m_type;
@@ -111,6 +113,7 @@ public:
     }
     std::string dump(int level = 0) const;
     STMT_TYPE stmt_type() const { return STMT_TYPE::ASSIGNMENT_LIST; }
+    std::unique_ptr<std::vector<bool>> isAllowed() const;
 
 private:
     VLANG_TYPE m_type;
@@ -252,6 +255,7 @@ public:
     std::string dump(int level = 0) const;
     std::string name() const { return m_proto.name(); }
     STMT_TYPE stmt_type() const { return STMT_TYPE::FUNCTION; }
+    const BlockStmtAST* body() const { return m_definition; }
 
 private:
     PrototypeAST m_proto;

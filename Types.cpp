@@ -27,7 +27,7 @@ Type* Int32Type::llvm_type() const {
 }
 
 int Int32Type::strength() const {
-    return 10;
+    return 20;
 }
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // DOUBLE TYPE
@@ -45,7 +45,7 @@ Type* DoubleType::llvm_type() const {
 }
 
 int DoubleType::strength() const {
-    return 20;
+    return 30;
 }
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // STRING TYPE
@@ -55,7 +55,7 @@ std::string StringType::str() const {
 }
 
 Type* StringType::llvm_type() const {
-    std::cerr << "TOOD: StringType::llvm_type()" << std::endl;
+    std::cerr << "TODO: StringType::llvm_type()" << std::endl;
     return nullptr;
 }
 
@@ -64,7 +64,27 @@ VLANG_TYPE StringType::vlang_type() const {
 }
 
 int StringType::strength() const {
-    return 30;
+    return 40;
+}
+
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// BOOL TYPE
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+std::string BoolType::str() const {
+    return "bool";
+}
+
+Type* BoolType::llvm_type() const {
+    std::cerr << "TODO: BoolType::llvm_type()" << std::endl;
+    return nullptr;
+}
+
+VLANG_TYPE BoolType::vlang_type() const {
+    return VLANG_TYPE::BOOL;
+}
+
+int BoolType::strength() const {
+    return 10;
 }
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // UTILS
