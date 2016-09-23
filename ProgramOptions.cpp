@@ -29,7 +29,9 @@ const std::vector<std::string>& ProgramOptions::input() const {
 }
 
 std::string ProgramOptions::first_input_file() const {
-    return m_vm["input-file"].as<std::vector<std::string>>()[0];
+    if (m_vm.count("input-file"))
+        return m_vm["input-file"].as<std::vector<std::string>>()[0];
+    else return "stdin";
 }
 
 bool ProgramOptions::contains_input_files() const {

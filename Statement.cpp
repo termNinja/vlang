@@ -35,7 +35,9 @@ std::unique_ptr<std::vector<bool>> AssignmentListStmtAST::isAllowed() const {
     std::unique_ptr<std::vector<bool>> result(new std::vector<bool>());
 
     for (auto &ass : m_list) {
-        if (semant::SemanticAnalyzer::isAllowedAssignment(m_type, ass.second->type()->vlang_type()))
+        const VlangType* exprType = ass.second->type();
+        if (exprType == nullptr) result->push_back(false);
+        else if (semant::SemanticAnalyzer::isAllowedAssignment(m_type, exprType->vlang_type()))
             result->push_back(true);
         else 
             result->push_back(false);

@@ -196,7 +196,7 @@ ExprAST* BinaryExprAST::clone() const { return new BinaryExprAST(m_op, m_left->c
 ExprAST* FunctionCallExprAST::clone() const {
     std::vector<ExprAST*> args;
     for (auto &a : m_args) args.push_back(a->clone());
-    return new FunctionCallExprAST(m_name, args);
+    return new FunctionCallExprAST(m_name, args, m_retType);
 }
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // Dump functions

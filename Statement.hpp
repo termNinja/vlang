@@ -32,6 +32,7 @@ typedef enum {
 /// -----------------------------------------------------------------------------------------------
 class StmtAST {
 public:
+    StmtAST(unsigned long long line) : m_line(line) {}
     virtual ~StmtAST() {}
 
     /// \brief Returns a string representation of Vala statement.
@@ -39,6 +40,12 @@ public:
 
     /// \brief Returns an enum representing the type of statement inside class hierarchy.
     virtual STMT_TYPE stmt_type() const = 0;
+
+    /// \brief Returns the line on which statement was found.
+    unsigned long long int line() const { return m_line; }
+
+private:
+    unsigned long long int m_line;
 };
 
 /// -----------------------------------------------------------------------------------------------
@@ -46,8 +53,8 @@ public:
 /// -----------------------------------------------------------------------------------------------
 class ReturnStmtAST : public StmtAST {
 public:
-    ReturnStmtAST(ExprAST* retVal)
-        : m_retVal(retVal)
+    ReturnStmtAST(ExprAST* retVal, unsigned long long line)
+        : StmtAST(line), m_retVal(retVal)
     {}
     ~ReturnStmtAST() { delete m_retVal; }
     std::string dump(int level = 0) const;
@@ -62,8 +69,8 @@ private:
 /// -----------------------------------------------------------------------------------------------
 class BlockStmtAST : public StmtAST {
 public:
-    BlockStmtAST(std::vector<StmtAST*> cmds)
-        : m_cmds(cmds)
+    BlockStmtAST(std::vector<StmtAST*> cmds, unsigned long long line)
+        : StmtAST(line), m_cmds(cmds)
     {}
     ~BlockStmtAST() {
         for (auto &cmd : m_cmds) delete cmd;
@@ -86,8 +93,8 @@ private:
 /// -----------------------------------------------------------------------------------------------
 class AssignmentStmtAST : public StmtAST {
 public:
-    AssignmentStmtAST(VLANG_TYPE type, std::string varName, ExprAST* expr)
-        : m_type(type), m_varName(varName), m_expr(expr)
+    AssignmentStmtAST(VLANG_TYPE type, std::string varName, ExprAST* expr, unsigned long long line)
+        : StmtAST(line), m_type(type), m_varName(varName), m_expr(expr)
     {}
     ~AssignmentStmtAST() {
         delete m_expr;
@@ -95,6 +102,9 @@ public:
     std::string dump(int level = 0) const;
     STMT_TYPE stmt_type() const { return STMT_TYPE::ASSIGNMENT; }
     bool isAllowed() const;
+    std::pair<VLANG_TYPE, VLANG_TYPE> assignmentTypes() const {
+        return std::pair<VLANG_TYPE, VLANG_TYPE>(m_type, m_expr->type()->vlang_type());
+    }
 
 private:
     VLANG_TYPE m_type;
@@ -104,8 +114,8 @@ private:
 
 class AssignmentListStmtAST : public StmtAST {
 public:
-    AssignmentListStmtAST (VLANG_TYPE type, std::vector<std::pair<std::string, ExprAST*>> assignmentList)
-        : m_type(type), m_list(assignmentList)
+    AssignmentListStmtAST (VLANG_TYPE type, std::vector<std::pair<std::string, ExprAST*>> assignmentList, unsigned long long line)
+        : StmtAST(line), m_type(type), m_list(assignmentList)
     {}
     ~AssignmentListStmtAST () {
         for (auto &elem : m_list)
@@ -113,6 +123,14 @@ public:
     }
     std::string dump(int level = 0) const;
     STMT_TYPE stmt_type() const { return STMT_TYPE::ASSIGNMENT_LIST; }
+    const std::vector<std::pair<std::string, ExprAST*>>& assignments() const { return m_list; }
+    std::pair<VLANG_TYPE, VLANG_TYPE> assignmentTypesIth(unsigned i) const {
+        const VlangType* exprType = m_list[i].second->type();
+        if (exprType == nullptr)
+            return std::pair<VLANG_TYPE, VLANG_TYPE>(m_type, VLANG_TYPE::UNKNOWN);
+        else
+            return std::pair<VLANG_TYPE, VLANG_TYPE>(m_type, exprType->vlang_type());
+    }
     std::unique_ptr<std::vector<bool>> isAllowed() const;
 
 private:
@@ -121,12 +139,12 @@ private:
 };
 
 /// -----------------------------------------------------------------------------------------------
-/// \brief Represents some constant evaluation (remove later)
+/// \brief Represents some constant evaluation.
 /// -----------------------------------------------------------------------------------------------
 class ExpressionStmtAST : public StmtAST {
 public:
-    ExpressionStmtAST(ExprAST* expr)
-        : m_expr(expr)
+    ExpressionStmtAST(ExprAST* expr, unsigned long long line)
+        : StmtAST(line), m_expr(expr)
     {}
     ~ExpressionStmtAST() { delete m_expr; }
     std::string dump(int level = 0) const;
@@ -136,8 +154,10 @@ private:
     ExprAST* m_expr;
 };
 
+/// \brief Represents an empty statement.
 class EmptyStmtAST : public StmtAST {
 public:
+    EmptyStmtAST(unsigned long long line) : StmtAST(line) {}
     std::string dump(int level = 0) const;
     STMT_TYPE stmt_type() const { return STMT_TYPE::EMPTY; }
 };
@@ -147,8 +167,8 @@ public:
 /// -----------------------------------------------------------------------------------------------
 class IfStmtAST : public StmtAST {
 public:
-    IfStmtAST(ExprAST* condExpr, StmtAST* thenStmt)
-        : m_condExpr(condExpr), m_thenStmt(thenStmt)
+    IfStmtAST(ExprAST* condExpr, StmtAST* thenStmt, unsigned long long line)
+        : StmtAST(line), m_condExpr(condExpr), m_thenStmt(thenStmt)
     {}
     ~IfStmtAST() {
         delete m_condExpr;
@@ -167,8 +187,8 @@ private:
 /// -----------------------------------------------------------------------------------------------
 class IfElseStmtAST : public StmtAST {
 public:
-    IfElseStmtAST(ExprAST* condExpr, StmtAST* thenStmt, StmtAST* elseStmt)
-        : m_condExpr(condExpr), m_thenStmt(thenStmt), m_elseStmt(elseStmt)
+    IfElseStmtAST(ExprAST* condExpr, StmtAST* thenStmt, StmtAST* elseStmt, unsigned long long line)
+        : StmtAST(line), m_condExpr(condExpr), m_thenStmt(thenStmt), m_elseStmt(elseStmt)
     {}
     ~IfElseStmtAST() {
         delete m_condExpr;
@@ -189,8 +209,8 @@ private:
 /// -----------------------------------------------------------------------------------------------
 class WhileStmtAST : public StmtAST {
 public:
-    WhileStmtAST(ExprAST* condExpr, StmtAST* bodyStmt)
-        : m_condExpr(condExpr), m_bodyStmt(bodyStmt)
+    WhileStmtAST(ExprAST* condExpr, StmtAST* bodyStmt, unsigned long long line)
+        : StmtAST(line), m_condExpr(condExpr), m_bodyStmt(bodyStmt)
     {}
     ~WhileStmtAST() {
         delete m_condExpr;
@@ -220,7 +240,9 @@ private:
 /// \brief This class is a simple placeholder for both PrototypeAST and FunctionAST.
 class ProtoDefContainer : public StmtAST {
 public:
+    ProtoDefContainer(unsigned long long line) : StmtAST(line) {}
     virtual std::string name() const = 0;
+    virtual VLANG_TYPE ret_val_type() const = 0;
 };
 
 /// -----------------------------------------------------------------------------------------------
@@ -228,12 +250,12 @@ public:
 /// -----------------------------------------------------------------------------------------------
 class PrototypeAST : public ProtoDefContainer {
 public:
-    PrototypeAST(std::string name, VLANG_TYPE retVal, std::vector<std::pair<VLANG_TYPE, std::string>> args)
-        : m_name(name), m_retVal(retVal), m_args(args)
+    PrototypeAST(std::string name, VLANG_TYPE retVal, std::vector<std::pair<VLANG_TYPE, std::string>> args, unsigned long long line)
+        : ProtoDefContainer(line), m_name(name), m_retVal(retVal), m_args(args)
     {}
     std::string dump(int level = 0) const;
     std::string name() const { return m_name; }
-    VLANG_TYPE ret_val_type() const { return m_retVal; }
+    virtual VLANG_TYPE ret_val_type() const { return m_retVal; }
     STMT_TYPE stmt_type() const { return STMT_TYPE::PROTOTYPE; }
 
 private:
@@ -247,14 +269,15 @@ private:
 /// -----------------------------------------------------------------------------------------------
 class FunctionAST : public ProtoDefContainer {
 public:
-    FunctionAST(PrototypeAST proto, BlockStmtAST* definition)
-        : m_proto(proto), m_definition(definition)
+    FunctionAST(PrototypeAST proto, BlockStmtAST* definition, unsigned long long line)
+        : ProtoDefContainer(line), m_proto(proto), m_definition(definition)
     {}
     ~FunctionAST() { delete m_definition; }
     const PrototypeAST& proto() const { return m_proto; }
     std::string dump(int level = 0) const;
     std::string name() const { return m_proto.name(); }
     STMT_TYPE stmt_type() const { return STMT_TYPE::FUNCTION; }
+    virtual VLANG_TYPE ret_val_type() const { return m_proto.ret_val_type(); }
     const BlockStmtAST* body() const { return m_definition; }
 
 private:

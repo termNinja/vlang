@@ -125,6 +125,10 @@ VlangType* make_from_enum(VLANG_TYPE type) {
             return new DoubleType();
         case VLANG_TYPE::STRING:
             return new StringType();
+        case VLANG_TYPE::BOOL:
+            return new BoolType();
+        case VLANG_TYPE::UNKNOWN:
+            return nullptr;
         default:
             std::cerr << "What is this type? " << to_str(type) << std::endl;
             return nullptr;

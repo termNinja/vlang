@@ -7,6 +7,7 @@
 
 #include "SemanticAnalyzer.hpp"
 #include "color.h"
+#include "ProgramOptions.hpp"
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 namespace vlang {
@@ -28,20 +29,26 @@ std::vector<StmtAST*>* SemanticAnalyzer::performAnalysis() {
     //      Semantic analysis runs       //
     // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= //
 
+    unsigned int numberOfErrors = 0;
+
     // Cast types into required values
     typeCastRun();
 
-    // Perform type checking
-    unsigned int numberOfErrors = 0;
-    if (! typeCheckRun(&numberOfErrors)) {
-        std::cerr << "Found " << numberOfErrors << " errors. " << std::endl;
-        std::cerr << BOLDRED << "fatal error: " << RED << " Can't proceed with compilation."
-                  << RESET << std::endl;
-    } else {
-        reportSuccess("Type check was successful.");
-    }
+    // --------------- //
+    //  Typechecking   //
+    // --------------- //
+    if (! typeCheckRun(&numberOfErrors))
+        std::cerr << BOLDRED << "fatal error: " << RESET << " errors: "
+                  << BOLDWHITE << numberOfErrors  << RESET << std::endl;
+    else reportSuccess("Type check was successful.");
+
+    // ------------ //
+    // UNKNOWN TYPE //
+    // ------------ //
 
     // Insert other runs here
+    // TODO:
+    // * Variable already declared
 
 
     std::cerr << BOLDRED << DRAGON_SEPARATOR() << RESET << std::endl;
@@ -51,7 +58,7 @@ std::vector<StmtAST*>* SemanticAnalyzer::performAnalysis() {
 }
 
 void SemanticAnalyzer::reportSuccess(std::string msg) const {
-    std::cerr << BOLDGREEN << "[semant]: " << msg << RESET << std::endl;
+    std::cerr << BOLDGREEN << msg << RESET << std::endl;
 }
 
 void SemanticAnalyzer::typeCastRun() {
@@ -60,6 +67,13 @@ void SemanticAnalyzer::typeCastRun() {
 
 void SemanticAnalyzer::reportAssignmentError(std::string err) const {
     std::cerr << RED << err << RESET << std::endl;
+}
+
+void SemanticAnalyzer::reportAssignmentError(std::string statement, unsigned long long line, VLANG_TYPE left, VLANG_TYPE right) const {
+    std::cerr << util::ProgramOptions::get().first_input_file() << ":" << line << ":" << BOLDRED << " error:" << RESET;
+    std::cerr << " Assignment: Cannot convert from " << BOLDWHITE << "'" << to_str(right) << "'" << RESET
+              << " to " << BOLDWHITE << "'" << to_str(left) << "'" << std::endl;
+    std::cerr << statement << RESET << std::endl << std::endl;
 }
 
 // TODO: Prettier error reporting (once I conclude everything works well)
@@ -76,18 +90,20 @@ bool SemanticAnalyzer::typeCheckRun(unsigned int* numberOfErrors) {
                 if (stmt->stmt_type() == STMT_TYPE::ASSIGNMENT) {
                     if (! static_cast<AssignmentStmtAST*>(stmt)->isAllowed()) {
                         (*numberOfErrors)++;
+                        std::pair<VLANG_TYPE, VLANG_TYPE> t = static_cast<AssignmentStmtAST*>(stmt)->assignmentTypes();
+                        reportAssignmentError(stmt->dump(), stmt->line(), t.first, t.second);
                         allFine = false;
-                    } else {
-                    }
+                    } else { /* assignment is correct */ }
                 } else if (stmt->stmt_type() == STMT_TYPE::ASSIGNMENT_LIST) {
-                    std::unique_ptr<std::vector<bool>> res = static_cast<AssignmentListStmtAST*>(stmt)->isAllowed();
+                    AssignmentListStmtAST* ptr = static_cast<AssignmentListStmtAST*>(stmt);
+                    std::unique_ptr<std::vector<bool>> res = ptr->isAllowed();
                     for (unsigned i = 0; i < res->size(); ++i) {
                         if (! (*res)[i]) {
                             // i-th assignment in assignment list has an error
-                            reportAssignmentError("Error in assignment: " + std::to_string(i));
+                            std::pair<VLANG_TYPE, VLANG_TYPE> t = ptr->assignmentTypesIth(i);
+                            reportAssignmentError(ptr->dump(), ptr->line(), t.first, t.second);
                             allFine = false;
                             (*numberOfErrors)++;
-                            std::cerr << "Setting allFine to false AssignmentListStmtAST" << std::endl;
                         }
                     }
                 }

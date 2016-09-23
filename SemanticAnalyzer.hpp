@@ -33,6 +33,7 @@ public:
     /// \brief Performs semantic analysis and returns modified AST
     std::vector<StmtAST*>* performAnalysis();
 
+    /// \brief Checks if an assignment is allowed.
     static bool isAllowedAssignment(VLANG_TYPE variableType, VLANG_TYPE exprType);
 
 private:
@@ -45,7 +46,13 @@ private:
     /// \return Returns true if compilation can proceed further.
     bool typeCheckRun(unsigned int* numberOfErrrors);
 
+    /// \brief Reports an assignment error with given error message.
     void reportAssignmentError(std::string err) const;
+
+    /// \brief Reports an assignment error with given error message and on given line.
+    void reportAssignmentError(std::string statement, unsigned long long line, VLANG_TYPE left, VLANG_TYPE right) const;
+
+    /// \brief Reports an sucessful operation with given message.
     void reportSuccess(std::string msg) const;
 
     std::vector<StmtAST*>* m_ast;

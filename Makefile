@@ -24,10 +24,25 @@ CXX = clang++
 CXXFLAGS = -g $(shell llvm-config --cxxflags) -fexceptions
 LDFLAGS = $(shell llvm-config --ldflags --system-libs --libs core native mcjit)
 BOOST = -DBOOST_NO_EXCEPTIONS -DBOOST_NO_EXCEPTION_STD_NAMESPACE -L /usr/lib/ -lm -lboost_program_options -fexceptions
-FILES = Makefile parser.ypp lexer.lex Statement.hpp Statement.cpp \
-	Expression.hpp Expression.cpp LLVMCodegen.hpp LLVMCodegen.cpp TypeChecker.hpp \
-	Types.hpp Types.cpp GlobalContainers.hpp GlobalContainers.hpp GlobalContainers.cpp \
-	SemanticAnalyzer.hpp SemanticAnalyzer.cpp
+FILES =  					\
+	Makefile 				\
+	parser.ypp 				\
+	lexer.lex 				\
+	Expression.cpp 			\
+	Expression.hpp 			\
+	GlobalContainers.cpp	\
+	GlobalContainers.hpp 	\
+	LLVMCodegen.cpp 		\
+	LLVMCodegen.hpp 		\
+	ProgramOptions.cpp 		\
+	ProgramOptions.hpp		\
+	SemanticAnalyzer.cpp	\
+	SemanticAnalyzer.hpp 	\
+	Statement.cpp 			\
+	Statement.hpp 			\
+	Types.cpp 				\
+	Types.hpp
+
 CLOC = $(shell type -p cloc || echo wc -l)
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -37,7 +52,7 @@ $(PROGRAM): lex.yy.o parser.tab.o LLVMCodegen.o Expression.o Types.o Statement.o
 	$(CXX) -o $@ $^ $(LDFLAGS) $(BOOST)
 	@echo
 parser.tab.o: 	parser.tab.cpp parser.tab.hpp LLVMCodegen.hpp Types.hpp Expression.hpp \
-				TypeChecker.hpp Statement.hpp ProgramOptions.hpp GlobalContainers.hpp \
+				Statement.hpp ProgramOptions.hpp GlobalContainers.hpp \
 				SemanticAnalyzer.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	@echo

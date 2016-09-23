@@ -20,6 +20,8 @@
 #include "Statement.hpp"
 
 #include "parser.tab.hpp"
+
+unsigned long long int ProgramLineCounter = 1;
 %}
 
 %x C_COMMENT
@@ -28,11 +30,20 @@
 int                 return int_ty_tok;
 double              return double_ty_tok;
 string              return string_ty_tok;
+bool                return bool_ty_tok;
 void                return void_ty_tok;
 if                  return if_tok;
 else                return else_tok;
 while               return while_tok;
 for                 return for_tok;
+true {
+    yylval.bool_val = true;
+    return bool_val_tok;
+}
+false {
+    yylval.bool_val = false;
+    return bool_val_tok;
+}
 
 stdout[.]printf     return stdout_printf_tok;
 
@@ -68,7 +79,11 @@ return              return return_tok;
     return double_val_tok;
 }
 
-[\t\n ] {}
+[\n] {
+    ++ProgramLineCounter;
+}
+
+[\t ] {}
 . {
     std::cerr << "Lexical error. Unrecognized character: '" << *yytext << "'" << std::endl;
     exit(EXIT_FAILURE);

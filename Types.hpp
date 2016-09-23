@@ -17,7 +17,7 @@ namespace vlang {
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 typedef enum{
-    INT32, INT64, DOUBLE, BOOL, STRING, VOID, NO_VAR_DECL
+    INT32, INT64, DOUBLE, BOOL, STRING, VOID, NO_VAR_DECL, UNKNOWN
 }VLANG_TYPE;
 
 std::string to_str(VLANG_TYPE type);

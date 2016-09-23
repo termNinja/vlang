@@ -228,14 +228,15 @@ private:
 
 /// -----------------------------------------------------------------------------------------------
 /// \brief Represents a function call expression.
+/// Comment: I passed type as argument because it was difficult to avoid mutual inclusion of
+/// headers files in order to access global map that uses Statement and Statement uses Expression.
 /// -----------------------------------------------------------------------------------------------
 class FunctionCallExprAST : public ExprAST {
 public:
-    FunctionCallExprAST(std::string name, std::vector<ExprAST*> args)
+    FunctionCallExprAST(std::string name, std::vector<ExprAST*> args, VLANG_TYPE retType)
         : m_name(name), m_args(args)
     {}
     virtual std::string dump(unsigned level = 0) const;
-    virtual const VlangType* type() const { return nullptr; }
     virtual Value* codegen() const;
     virtual EXP_TYPE exp_type() const { return EXP_TYPE::CALL_EXP; }
     virtual ExprAST* promote(VLANG_TYPE type) {
@@ -243,10 +244,14 @@ public:
     }
     virtual ExprAST* convertTo(VLANG_TYPE type);
     virtual ExprAST* clone() const;
+    virtual const VlangType* type() const { 
+        return make_from_enum(m_retType);
+    }
 
 private:
     std::string m_name;
     std::vector<ExprAST*> m_args;
+    VLANG_TYPE m_retType;
 };
 
 /// -----------------------------------------------------------------------------------------------
