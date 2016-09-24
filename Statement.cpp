@@ -7,6 +7,8 @@
 
 #include "Statement.hpp"
 #include "SemanticAnalyzer.hpp"
+#include "color.h"
+#include "ProgramOptions.hpp"
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 namespace vlang {
@@ -39,7 +41,7 @@ std::unique_ptr<std::vector<bool>> AssignmentListStmtAST::isAllowed() const {
         if (exprType == nullptr) result->push_back(false);
         else if (semant::SemanticAnalyzer::isAllowedAssignment(m_type, exprType->vlang_type()))
             result->push_back(true);
-        else 
+        else
             result->push_back(false);
     }
 
@@ -51,18 +53,33 @@ std::unique_ptr<std::vector<bool>> AssignmentListStmtAST::isAllowed() const {
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 std::string ReturnStmtAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
-    res += "return " + m_retVal->dump() + ";";
+    if (util::ProgramOptions::get().syntax_highlight())
+        res += std::string(KEYWORD_C) + "return " + std::string(RESET);
+    else res += "return ";
+    res += m_retVal->dump() + ";";
     return res;
 }
 
 std::string PrototypeAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
-    res += to_str(m_retVal) + " " + m_name + "(";
+    res += to_str(m_retVal) + " ";
+    if (util::ProgramOptions::get().syntax_highlight())
+        res += std::string(FUNNAME_C) + m_name + std::string(RESET) + "(";
+    else res += m_name + "(";
+
     if (! m_args.empty()) {
         unsigned i = 0;
-        for (; i < m_args.size()-1; ++i)
-            res += to_str(m_args[i].first) + " " + m_args[i].second + ", ";
-        res += to_str(m_args[i].first) + " " + m_args[i].second;
+        for (; i < m_args.size()-1; ++i) {
+            res += to_str(m_args[i].first) + " ";
+            if (util::ProgramOptions::get().syntax_highlight())
+                res += std::string(VARIABLE_C) + m_args[i].second + std::string(RESET) + ",";
+            else  res += m_args[i].second + ", ";
+
+        }
+        res += to_str(m_args[i].first) + " ";
+        if (util::ProgramOptions::get().syntax_highlight())
+            res += std::string(VARIABLE_C) + m_args[i].second + std::string(RESET);
+        else  res += m_args[i].second;
     }
     res += ");";
     return res;
@@ -99,7 +116,10 @@ std::string EmptyStmtAST::dump(int) const {
 
 std::string IfStmtAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
-    res += "if (";
+    if (util::ProgramOptions::get().syntax_highlight())
+        res += std::string(KEYWORD_C) + "if" + std::string(RESET) + " (";
+    else
+        res += "if (";
     res += m_condExpr->dump() + ") ";
     if (m_thenStmt->stmt_type() != STMT_TYPE::BLOCK)
         res += "\n" + m_thenStmt->dump(level+1);
@@ -109,7 +129,11 @@ std::string IfStmtAST::dump(int level) const {
 
 std::string IfElseStmtAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
-    res += "if (";
+
+    if (util::ProgramOptions::get().syntax_highlight())
+        res += std::string(KEYWORD_C) + "if" + std::string(RESET) + " (";
+    else
+        res += "if (";
     res += m_condExpr->dump() + ") ";
 
     // if part
@@ -119,10 +143,13 @@ std::string IfElseStmtAST::dump(int level) const {
         res += m_thenStmt->dump(level+1);
 
     // else part
+    std::string else_thingie = "else";
+    if (util::ProgramOptions::get().syntax_highlight())
+        else_thingie = std::string(KEYWORD_C) + else_thingie + std::string(RESET);
     if (m_thenStmt->stmt_type() != STMT_TYPE::BLOCK)
-        res += "\n" + getStrWithIndent(level) + "else";
+        res += "\n" + getStrWithIndent(level) + else_thingie;
     else
-        res += " else ";
+        res += else_thingie;
     if (m_elseStmt->stmt_type() != STMT_TYPE::BLOCK)
         res += "\n" + m_elseStmt->dump(level+1);
     else
@@ -132,7 +159,11 @@ std::string IfElseStmtAST::dump(int level) const {
 
 std::string WhileStmtAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
-    res += "while (" + m_condExpr->dump() + ")";
+    if (util::ProgramOptions::get().syntax_highlight())
+        res += std::string(KEYWORD_C) + "while " + std::string(RESET);
+    else
+        res += "while ";
+    res += "(" + m_condExpr->dump() + ")";
     if (m_bodyStmt->stmt_type() == STMT_TYPE::BLOCK)
         res += " " + m_bodyStmt->dump(level+1);
     else
@@ -142,13 +173,17 @@ std::string WhileStmtAST::dump(int level) const {
 
 std::string AssignmentStmtAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
+    std::string eq = (util::ProgramOptions::get().syntax_highlight() ?
+            std::string(OPERATOR_C) + " = " + std::string(RESET) : " = ");
     if (m_type != VLANG_TYPE::NO_VAR_DECL) res += to_str(m_type) + " ";
-    res += m_varName + " = " + m_expr->dump() + ";";
+    res += m_varName + eq + m_expr->dump() + ";";
     return res;
 }
 
 std::string AssignmentListStmtAST::dump(int level) const {
     std::string res = getStrWithIndent(level);
+    std::string eq = (util::ProgramOptions::get().syntax_highlight() ?
+            std::string(OPERATOR_C) + " = " + std::string(RESET) : " = ");
     res += to_str(m_type) + " ";
     if (m_list.empty())
         return "Error, assignment list is empty!";
@@ -157,10 +192,10 @@ std::string AssignmentListStmtAST::dump(int level) const {
         if (m_list[i].second == nullptr)
             res += m_list[i].first + ", ";
         else
-            res += m_list[i].first + " = " + m_list[i].second->dump() + ", ";
+            res += m_list[i].first + eq + m_list[i].second->dump() + ", ";
     }
     if (m_list[i].second == nullptr) res += m_list[i].first + ";";
-    else res += m_list[i].first + " = " + m_list[i].second->dump() + ";";
+    else res += m_list[i].first + eq + m_list[i].second->dump() + ";";
     return res;
 }
 

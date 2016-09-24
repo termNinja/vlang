@@ -1,6 +1,13 @@
+/*
+ * colors.h
+ * Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
+ *
+ * Distributed under terms of the MIT license.
+ */
 #ifndef _COLORS_H
 #define _COLORS_H
 
+/* General colors */
 #define RESET   	"\033[0m"
 #define BLACK   	"\033[30m"      		/* Black */
 #define RED     	"\033[31m"      		/* Red */
@@ -18,5 +25,16 @@
 #define BOLDMAGENTA "\033[1m\033[35m"      	/* Bold Magenta */
 #define BOLDCYAN    "\033[1m\033[36m"      	/* Bold Cyan */
 #define BOLDWHITE   "\033[1m\033[37m"      	/* Bold White */
+
+/* Syntax highlighting */
+#define INT_C       "\033[1m\033[36m"      	/* Bold Cyan */
+#define DOUBLE_C    "\033[1m\033[33m"      	/* Bold Yellow */
+#define STRING_C    "\033[35m"      		/* Magenta */
+#define KEYWORD_C   "\033[1m\033[31m"      	/* Bold Red */
+#define OPERATOR_C  "\033[36m"      		/* Cyan */
+#define TYPE_C      "\033[1m\033[35m"      	/* Bold Magenta */
+#define BOOL_C      "\033[1m\033[35m"      	/* Bold Magenta */
+#define FUNNAME_C   "\033[1m\033[34m"      	/* Bold Blue */
+#define VARIABLE_C  "\033[1m\033[37m"      	/* Bold White */
 
 #endif

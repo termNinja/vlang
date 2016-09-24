@@ -6,6 +6,8 @@
  */
 
 #include "ProgramOptions.hpp"
+#include "GlobalContainers.hpp"
+#include "color.h"
 
 #include <sstream>
 #include <iomanip>
@@ -60,25 +62,30 @@ std::string ProgramOptions::output_path() const {
 
 std::string ProgramOptions::show_state() const {
     std::stringstream ss;
-    std::string separator = "********************************************************\n";
+    std::string separator = std::string(BOLDRED) + DRAGON_SEPARATOR() + std::string(RESET);
 
     // Showing input
-    ss << separator;
+    ss << separator << std::endl << BOLDBLUE;
     
     ss << "Input: ";
     if (contains_input_files()) {
-        ss << std::endl;
+        ss << std::endl << BOLDWHITE;
         for (auto &a : input())
             ss << "* " << a << std::endl;
+        ss << RESET;
     } else {
-        ss << "stdin" << std::endl;
+        ss << BOLDWHITE << "stdin" << RESET << std::endl;
     }
 
     // Showing output
-    ss << "Output: " << output_path() << std::endl;
+    ss << BOLDBLUE << "Output: " << BOLDWHITE << output_path() << std::endl;
 
-    ss << separator << std::endl;
+    ss << RESET << separator << std::endl;
     return ss.str();
+}
+
+bool ProgramOptions::syntax_highlight() const {
+    return m_vm["color-dump"].as<bool>();
 }
 
 void ProgramOptions::init(int argc, char** argv) {
@@ -94,6 +101,7 @@ void ProgramOptions::init(int argc, char** argv) {
         ("input-file,i", opt::value<std::vector<std::string> >(), "input .vala file")
         ("output,o", opt::value<std::string>()->default_value("a.out"), " executable output path and name")
         ("emit-source,s", opt::value<bool>()->default_value(false), " shows the parsed source code")
+        ("color-dump,C", opt::value<bool>()->default_value(false), " if code is shown, this option gives it syntax highlight")
     ;
 
     // Let's make any given unspecified argument as input file

@@ -49,6 +49,9 @@ public:
     /// \brief Returns the first input file given in program options.
     std::string first_input_file() const;
 
+    /// \brief Returns true if vlang dumps colored code.
+    bool syntax_highlight() const;
+
     /// \brief Returns the executable path and name
     std::string output_path() const;
 

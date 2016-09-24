@@ -18,8 +18,11 @@
 #include "ProgramOptions.hpp"
 #include "GlobalContainers.hpp"
 #include "SemanticAnalyzer.hpp"
+#include "color.h"
 
 #define YYDEBUG 1
+
+extern unsigned long long int ProgramLineCounter;
 
 int yylex();
 void yyerror(const std::string &err_msg) {
@@ -27,7 +30,12 @@ void yyerror(const std::string &err_msg) {
     exit(EXIT_FAILURE);
 }
 
-extern unsigned long long int ProgramLineCounter;
+void syntax_error(std::string err_msg) {
+    std::string fileName = vlang::util::ProgramOptions::get().first_input_file();
+    std::cerr << fileName << ":" << ProgramLineCounter << ":" << BOLDRED << "error: " << RESET;
+    std::cerr << err_msg << std::endl;
+}
+
 
 %}
 
@@ -153,8 +161,7 @@ Stmt: FunDeclaration ';' {
     }
     if (isValid) {
         $$ = $1;
-    }
-    else {
+    } else {
         $$ = nullptr;
     }
 }
@@ -305,6 +312,9 @@ Expr: '(' Expr ')' {
     delete $1;
     delete $3;
 }
+| error {
+    syntax_error("Unknown expression.");
+}
 ;
 
 /* List of expressions with separator ',' */
@@ -357,6 +367,9 @@ VlangType: int_ty_tok {
 }
 | bool_ty_tok {
     $$ = vlang::VLANG_TYPE::BOOL;
+}
+| error {
+    syntax_error("Unrecognized type.");
 }
 ;
 

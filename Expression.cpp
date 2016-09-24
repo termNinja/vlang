@@ -7,6 +7,9 @@
 
 #include "Expression.hpp"
 #include "GlobalContainers.hpp"
+#include "color.h"
+
+#include "ProgramOptions.hpp"
 
 // Required in order to use lexical cast
 namespace boost{
@@ -150,10 +153,9 @@ const VlangType* BinaryExprAST::type() const {
     if (m_left->type() == m_right->type())
         return m_left->type();
     else {
-        std::cerr << "[BinaryExprAST]: Operand type mismatch." << std::endl;
-        std::cerr << "[BinaryExprAST]: left: " << m_left->type()->str() << std::endl;
-        std::cerr << "[BinaryExprAST]: right: " << m_right->type()->str() << std::endl;
-        return m_left->type();
+        if (m_left->type()->strength() > m_right->type()->strength())
+            return m_left->type();
+        else return m_right->type();
     }
 }
 
@@ -202,27 +204,46 @@ ExprAST* FunctionCallExprAST::clone() const {
 // Dump functions
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 std::string ConstIntExprAST::dump(unsigned) const {
-    return boost::lexical_cast<std::string>(m_val);
+    std::string res = boost::lexical_cast<std::string>(m_val);
+    if (vlang::util::ProgramOptions::get().syntax_highlight())
+        res = std::string(INT_C) + res + std::string(RESET);
+    return res;
 }
 
 std::string ConstDoubleExprAST::dump(unsigned) const {
-    return boost::lexical_cast<std::string>(m_val);
+    std::string res = std::to_string(m_val);
+    if (vlang::util::ProgramOptions::get().syntax_highlight())
+        res = std::string(DOUBLE_C) + res + std::string(RESET);
+    return res;
 }
 
 std::string StringExprAST::dump(unsigned) const {
-    return "\"" + m_str + "\"";
+    std::string res = "\"" + m_str + "\"";
+    if (vlang::util::ProgramOptions::get().syntax_highlight())
+        res = std::string(STRING_C) + res + std::string(RESET);
+    return res;
 }
 
 std::string UnaryExprAST::dump(unsigned) const {
-    return m_op + m_expr->dump();
+    std::string res = m_op;
+    if (vlang::util::ProgramOptions::get().syntax_highlight())
+        res = std::string(OPERATOR_C) + res + std::string(RESET);
+    res += m_expr->dump();
+    return res;
 }
 
 std::string BinaryExprAST::dump(unsigned) const {
-    return m_left->dump() + " " + m_op + " " + m_right->dump();
+    std::string res = m_op;
+    if (vlang::util::ProgramOptions::get().syntax_highlight())
+        res = std::string(OPERATOR_C) + res + std::string(RESET);
+    return m_left->dump() + " " + res + " " + m_right->dump();
 }
 
 std::string VariableExprAST::dump(unsigned) const {
-    return boost::lexical_cast<std::string>(m_name);
+    std::string res = boost::lexical_cast<std::string>(m_name);
+    if (vlang::util::ProgramOptions::get().syntax_highlight())
+        res = std::string(VARIABLE_C) + res + std::string(RESET);
+    return res;
 }
 
 std::string FunctionCallExprAST::dump(unsigned) const {
@@ -243,8 +264,10 @@ std::string FunctionCallExprAST::dump(unsigned) const {
 }
 
 std::string BoolExprAST::dump(unsigned) const {
-    if (m_val) return "true";
-    else return "false";
+    std::string res = (m_val == true ? "true" : "false");
+    if (vlang::util::ProgramOptions::get().syntax_highlight())
+        res = std::string(BOOL_C) + res + std::string(RESET);
+    return res;
 }
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

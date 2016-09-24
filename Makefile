@@ -28,6 +28,7 @@ FILES =  					\
 	Makefile 				\
 	parser.ypp 				\
 	lexer.lex 				\
+	color.h 				\
 	Expression.cpp 			\
 	Expression.hpp 			\
 	GlobalContainers.cpp	\
@@ -53,7 +54,7 @@ $(PROGRAM): lex.yy.o parser.tab.o LLVMCodegen.o Expression.o Types.o Statement.o
 	@echo
 parser.tab.o: 	parser.tab.cpp parser.tab.hpp LLVMCodegen.hpp Types.hpp Expression.hpp \
 				Statement.hpp ProgramOptions.hpp GlobalContainers.hpp \
-				SemanticAnalyzer.hpp
+				SemanticAnalyzer.hpp color.h
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	@echo
 parser.tab.cpp parser.tab.hpp: parser.ypp
@@ -68,13 +69,13 @@ lex.yy.c: lexer.lex
 LLVMCodegen.o: LLVMCodegen.cpp LLVMCodegen.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	@echo
-Expression.o: Expression.cpp Expression.hpp LLVMCodegen.hpp Types.hpp SemanticAnalyzer.hpp
+Expression.o: Expression.cpp Expression.hpp LLVMCodegen.hpp Types.hpp SemanticAnalyzer.hpp ProgramOptions.hpp color.h
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	@echo
 Types.o: Types.cpp Types.hpp LLVMCodegen.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	@echo
-Statement.o: Statement.cpp Statement.hpp Expression.hpp LLVMCodegen.hpp SemanticAnalyzer.hpp
+Statement.o: Statement.cpp Statement.hpp Expression.hpp LLVMCodegen.hpp SemanticAnalyzer.hpp ProgramOptions.hpp color.h
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	@echo
 ProgramOptions.o: ProgramOptions.cpp ProgramOptions.hpp
@@ -84,7 +85,7 @@ GlobalContainers.o: GlobalContainers.cpp GlobalContainers.hpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	@echo
 SemanticAnalyzer.o: SemanticAnalyzer.cpp SemanticAnalyzer.hpp Statement.hpp Expression.hpp \
-	GlobalContainers.hpp
+	GlobalContainers.hpp color.h
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 	@echo
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

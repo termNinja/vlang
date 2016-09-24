@@ -6,6 +6,8 @@
  */
 
 #include "Types.hpp"
+#include "ProgramOptions.hpp"
+#include "color.h"
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 namespace vlang {
@@ -15,7 +17,10 @@ namespace vlang {
 // INT32
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 std::string Int32Type::str() const {
-    return "int";
+    std::string res = "int";
+    if (util::ProgramOptions::get().syntax_highlight())
+        res = std::string(TYPE_C) + res + std::string(RESET);
+    return res;
 }
 
 VLANG_TYPE Int32Type::vlang_type() const {
@@ -33,7 +38,10 @@ int Int32Type::strength() const {
 // DOUBLE TYPE
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 std::string DoubleType::str() const {
-    return "double";
+    std::string res = "double";
+    if (util::ProgramOptions::get().syntax_highlight())
+        res = std::string(TYPE_C) + res + std::string(RESET);
+    return res;
 }
 
 VLANG_TYPE DoubleType::vlang_type() const {
@@ -71,7 +79,10 @@ int StringType::strength() const {
 // BOOL TYPE
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 std::string BoolType::str() const {
-    return "bool";
+    std::string res = "bool";
+    if (util::ProgramOptions::get().syntax_highlight())
+        res = std::string(TYPE_C) + res + std::string(RESET);
+    return res;
 }
 
 Type* BoolType::llvm_type() const {
@@ -90,24 +101,22 @@ int BoolType::strength() const {
 // UTILS
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 std::string to_str(VLANG_TYPE type) {
+    std::string res;
     switch (type) {
-        case INT32:
-            return "int";
-        case INT64:
-            return "int64";
-        case DOUBLE:
-            return "double";
-        case BOOL:
-            return "bool";
-        case STRING:
-            return "string";
-        case VOID:
-            return "void";
-        default:
-            return "unknown_type";
+        case INT32:     res = "int";        break;
+        case INT64:     res = "int64";      break;
+        case DOUBLE:    res = "double";     break;
+        case BOOL:      res = "bool";       break;
+        case STRING:    res = "string";     break;
+        case VOID:      res = "void";       break;
+        default:        res = "unknown_t";  break;
     }
+    if (util::ProgramOptions::get().syntax_highlight())
+        return std::string(TYPE_C) + res + std::string(RESET);
+    else return res;
 }
 
+// TODO: Support syntax highlight here? Not really needed atm...
 std::string to_str(Type* llvm_type) {
     if (llvm_type == LLVM_INTTY)
         return "int";

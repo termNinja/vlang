@@ -16,7 +16,7 @@
 #include "Types.hpp"
 #include "Statement.hpp"
 
-#define DRAGON_SEPARATOR() "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-*-*-*-**-*-*-*-*-*-*-*-*-*"
+#define DRAGON_SEPARATOR() "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*"
 
 //class ProtoDefContainer;
 
