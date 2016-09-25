@@ -18,7 +18,7 @@ namespace vlang {
 
 typedef enum{
     INT32, INT64, DOUBLE, BOOL, STRING, VOID, NO_VAR_DECL, UNKNOWN
-}VLANG_TYPE;
+} VLANG_TYPE;
 
 std::string to_str(VLANG_TYPE type);
 std::string to_str(Type* llvm_type);
@@ -85,6 +85,14 @@ public:
 /// \brief Represenets an bool type.
 /// -----------------------------------------------------------------------------------------------
 class BoolType : public VlangType {
+public:
+    virtual std::string str() const;
+    virtual Type* llvm_type() const;
+    virtual VLANG_TYPE vlang_type() const;
+    virtual int strength() const;
+};
+
+class VoidType : public VlangType {
 public:
     virtual std::string str() const;
     virtual Type* llvm_type() const;

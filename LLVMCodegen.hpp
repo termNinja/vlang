@@ -24,10 +24,15 @@ using namespace llvm;
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 #define LLVM_INT(x) ConstantInt::get(TheContext, APInt(32, x))
 #define LLVM_INT_SIZE(x, y) ConstantInt::get(TheContext, APInt(x, y))
-#define LLVM_INTTY Type::getInt32Ty(TheContext)
+#define LLVM_INTTY() Type::getInt32Ty(TheContext)
 
 #define LLVM_DOUBLE(x) ConstantFP::get(TheContext, APFloat(x))
-#define LLVM_DOUBLETY Type::getDoubleTy(TheContext)
+#define LLVM_DOUBLETY() Type::getDoubleTy(TheContext)
+
+#define LLVM_BOOL(x) ConstantInt::get(TheContext, APInt(1, x))
+#define LLVM_BOOLTY() Type::getInt1Ty(TheContext)
+
+#define LLVM_VOIDTY() Type::getVoidTy(TheContext)
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // Global things we need for our compiler
@@ -43,9 +48,13 @@ extern std::unique_ptr<legacy::FunctionPassManager> TheFPM;
 // Helper functions
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 void InitializeModuleAndPassManager();
+Function* GetFunction(const std::string& name);
 Value* logError(std::string err_msg);
 AllocaInst* CreateEntryBlockAllocaInt32(Function* TheFunction, const std::string& name);
+AllocaInst* CreateEntryBlockAllocaBool(Function* TheFunction, const std::string& name);
 AllocaInst* CreateEntryBlockAllocaInt64(Function* TheFunction, const std::string& name);
 AllocaInst* CreateEntryBlockAllocaIntDouble(Function* TheFunction, const std::string& name);
+
+AllocaInst* GetEntryBlockAllocaForType(Function* TheFunction, Type* type, const std::string& name);
 
 #endif /* ifndef LLVM_CODEGEN_HPP */

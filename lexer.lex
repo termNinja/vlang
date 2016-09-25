@@ -19,6 +19,8 @@
 #include "Expression.hpp"
 #include "Statement.hpp"
 
+#include "GlobalContainers.hpp"
+
 #include "parser.tab.hpp"
 
 unsigned long long int ProgramLineCounter = 1;
@@ -61,7 +63,17 @@ return              return return_tok;
 <C_COMMENT>"*/"     BEGIN(INITIAL);
 <C_COMMENT>.        { }
 
-[,.<>;=!&|:?(){}\[\]+*/%-] {
+"{" {
+    vlang::BeginScope();
+    return *yytext;
+}
+
+"}" {
+    vlang::EndScope();
+    return *yytext;
+}
+
+[,.<>;=!&|:?()\[\]+*/%-] {
     return *yytext;
 }
 

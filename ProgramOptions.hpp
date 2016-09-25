@@ -58,6 +58,9 @@ public:
     /// \brief Returns a string which shows the state of program options.
     std::string show_state() const;
 
+    /// \brief Returns true if compiler should emit llvm code.
+    bool emit_llvm() const;
+
 private:
     ProgramOptions() {}
     ProgramOptions(const ProgramOptions&) = delete;

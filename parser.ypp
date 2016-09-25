@@ -38,6 +38,8 @@ void syntax_error(std::string err_msg) {
     std::cerr << err_msg << std::endl;
 }
 
+std::vector<vlang::StmtAST*>* ParsedProgram;
+
 %}
 
 /* Types */
@@ -107,25 +109,7 @@ void syntax_error(std::string err_msg) {
 
 %%
 TheProgram: Program {
-    if (vlang::util::ProgramOptions::get().emit_source()) {
-        std::cout << std::endl << DRAGON_SEPARATOR() << std::endl;
-        std::cout << "parsed source:" << std::endl;
-        std::cout << DRAGON_SEPARATOR() << std::endl;
-        for (auto &stmt : *$1)
-            std::cout << stmt->dump() << std::endl;
-        std::cout << std::endl << std::endl;
-    }
-
-    // perform semantic analysis
-    vlang::semant::SemanticAnalyzer semanticAnalyzer($1);
-    $1 = semanticAnalyzer.performAnalysis();
-
-    // perform compilation
-    // TODO
-
-    for (auto &miniast : *$1)
-        delete miniast;
-    delete $1;
+    ParsedProgram = $1;
 }
 
 /* Program is a series of statements. */
@@ -237,6 +221,9 @@ Instruction: return_tok Expr ';' {
 */
 | VlangType Assignments ';' {
     $$ = new vlang::AssignmentListStmtAST($1, *$2, ProgramLineCounter);
+    for (auto & a : *$2) {
+        vlang::RegisterVariable(a.first, $1);
+    }
     delete $2;
 }
 /*| Assignments ';' {*/
@@ -300,7 +287,7 @@ Expr: '(' Expr ')' {
     delete $1;
 }
 | id_tok {
-    $$ = new vlang::VariableExprAST(*$1);
+    $$ = new vlang::VariableExprAST(*$1, vlang::GetVariableType(*$1));
     delete $1;
 }
 | id_tok '(' ExprList ')' {
@@ -317,9 +304,11 @@ Expr: '(' Expr ')' {
     delete $1;
     delete $3;
 }
+/*
 | error {
     syntax_error("Unknown expression.");
 }
+*/
 ;
 
 /* List of expressions with separator ',' */
@@ -373,9 +362,11 @@ VlangType: int_ty_tok {
 | bool_ty_tok {
     $$ = vlang::VLANG_TYPE::BOOL;
 }
+/*
 | error {
     syntax_error("Unrecognized type.");
 }
+*/
 ;
 
 /* A chain of function arguments */
@@ -397,6 +388,7 @@ ArgList: ArgList ',' Arg {
 /* A function argument */
 Arg: VlangType id_tok {
     $$ = new std::pair<vlang::VLANG_TYPE, std::string>($1, *$2);
+    vlang::RegisterVariable(*$2, $1);
     delete $2;
 }
 
@@ -405,6 +397,7 @@ extern FILE* yyin;
 int main(int argc, char** argv) {
     /*yydebug = 1;*/
     vlang::util::ProgramOptions::get().init(argc, argv);
+    vlang::BeginScope();
 
     // For now, we only support one file
     if (vlang::util::ProgramOptions::get().contains_input_files()) {
@@ -418,8 +411,44 @@ int main(int argc, char** argv) {
     std::cout << vlang::util::ProgramOptions::get().show_state() << std::endl;
 
     yyparse();
-
     fclose(yyin);
+
+
+    // Show source if required
+    if (vlang::util::ProgramOptions::get().emit_source()) {
+        std::cout << std::endl << DRAGON_SEPARATOR() << std::endl;
+        std::cout << "parsed source:" << std::endl;
+        std::cout << DRAGON_SEPARATOR() << std::endl;
+        for (auto &stmt : *ParsedProgram)
+            std::cout << stmt->dump() << std::endl;
+        std::cout << std::endl << std::endl;
+    }
+
+    // perform semantic analysis
+    vlang::semant::SemanticAnalyzer semanticAnalyzer(ParsedProgram);
+    ParsedProgram = semanticAnalyzer.performAnalysis();
+
+    // perform llvm compilation
+    InitializeNativeTarget();
+    InitializeNativeTargetAsmPrinter();
+    InitializeNativeTargetAsmParser();
+    InitializeModuleAndPassManager();
+
+    for (auto &miniast : *ParsedProgram) {
+        miniast->codegen();
+    }
+
+    if (vlang::util::ProgramOptions::get().emit_llvm()) {
+        TheModule->dump();
+        std::cout << "\n; End of module" << std::endl;
+    }
+
+    for (auto &miniast : *ParsedProgram)
+        delete miniast;
+    delete ParsedProgram;
+
+
+    TheModule.release();
     return 0;
 }
 

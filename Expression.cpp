@@ -108,6 +108,7 @@ Value* ConstDoubleExprAST::codegen() const {
     return LLVM_DOUBLE(m_val);
 }
 
+// TODO
 Value* StringExprAST::codegen() const {
     return nullptr;
 }
@@ -122,22 +123,113 @@ Value* VariableExprAST::codegen() const {
     return Builder.CreateLoad(varAddress);
 }
 
+// TODO
 Value* UnaryExprAST::codegen() const {
+    std::cerr << "UnaryExprAST::codegen() has not yet been implemented!" << std::endl;
     return nullptr;
 }
 
 Value* BinaryExprAST::codegen() const {
-    // TODO: Finish this once I complete semantic analysis.
+    if (m_op == "=") {
+        Value* assignMe = m_right->codegen();
+        if (! assignMe) return logError("Failed m_right->codegen() in BinaryExprAST::codegen()");
+        if (m_left->exp_type() != EXP_TYPE::VARIABLE_EXP) return logError("Bad left operand in assignment, it isnt a variable!");
+        VariableExprAST* var = static_cast<VariableExprAST*>(m_left);
 
+        // Check if it's a local variable
+        auto localFinder = NamedValues.find(var->name());
+        if (localFinder != NamedValues.end())
+            return Builder.CreateStore(assignMe, localFinder->second);
+
+        // Check if global
+        auto globalFinder = GlobalValues.find(var->name());
+        if (globalFinder != GlobalValues.end()) return Builder.CreateStore(assignMe, globalFinder->second);
+
+        return logError("Failed assigning to variable '" + var->name() + "'");
+    }
+    Value* left = m_left->codegen();
+    Value* right = m_right->codegen();
+    if (left == nullptr) return logError("Failed m_left->codegen() in BinaryExprAST::codegen()");
+    if (right == nullptr) return logError("Failed m_right->codegen() in BinaryExprAST::codegen()");
+
+    if (m_op == "+") {
+        switch (type()->vlang_type()) {
+            case VLANG_TYPE::INT32: return Builder.CreateAdd(left, right, "intadd");
+            case VLANG_TYPE::DOUBLE: return Builder.CreateFAdd(left, right, "doubleadd");
+            default:
+                std::cerr << "Unsupported operation + on operands of type: " << type()->str() << std::endl;
+                return nullptr;
+        }
+    } else if (m_op == "-") {
+        switch (type()->vlang_type()) {
+            case VLANG_TYPE::INT32: return Builder.CreateSub(left, right, "intsub");
+            case VLANG_TYPE::DOUBLE: return Builder.CreateFSub(left, right, "doublesub");
+            default:
+                std::cerr << "Unsupported operation - on operands of type: " << type()->str() << std::endl;
+                return nullptr;
+        }
+    } else if (m_op == "*") {
+        switch (type()->vlang_type()) {
+            case VLANG_TYPE::INT32: return Builder.CreateMul(left, right, "intmul");
+            case VLANG_TYPE::DOUBLE: return Builder.CreateFMul(left, right, "doublemul");
+            default:
+                std::cerr << "Unsupported operation * on operands of type: " << type()->str() << std::endl;
+                return nullptr;
+        }
+    } else if (m_op == "/") {
+        switch (type()->vlang_type()) {
+            case VLANG_TYPE::INT32: return Builder.CreateUDiv(left, right, "intdiv");
+            case VLANG_TYPE::DOUBLE: return Builder.CreateFDiv(left, right, "doublediv");
+            default:
+                std::cerr << "Unsupported operation / on operands of type: " << type()->str() << std::endl;
+                return nullptr;
+        }
+    } else if (m_op == "%") {
+        if (type()->vlang_type() == VLANG_TYPE::INT32) {
+            return Builder.CreateSRem(left, right, "intmod");
+        } else {
+            std::cerr << "Unsupported operation " << m_op << " on operands of type: " << type()->str() << std::endl;
+            return nullptr;
+        }
+    } else if (m_op == "<") {
+        switch (type()->vlang_type()) {
+            case VLANG_TYPE::INT32:
+                return Builder.CreateICmpULT(left, right, "intlt");
+            case VLANG_TYPE::DOUBLE:
+                left = Builder.CreateFCmpULT(left, right, "doublelt");
+                return Builder.CreateUIToFP(left, LLVM_DOUBLETY(), "boollt");
+            default:
+                std::cerr << "Unsupported operation " << m_op << " on operands of type: " << type()->str() << std::endl;
+                return nullptr;
+        }
+    } else if (m_op == ">") {
+        switch (type()->vlang_type()) {
+            case VLANG_TYPE::INT32:
+                return Builder.CreateICmpUGT(left, right, "intgt");
+            case VLANG_TYPE::DOUBLE:
+                left = Builder.CreateFCmpUGT(left, right, "doublegt");
+                return Builder.CreateUIToFP(left, LLVM_DOUBLETY(), "boolgt");
+            default:
+                std::cerr << "Unsupported operation " << m_op << " on operands of type: " << type()->str() << std::endl;
+                return nullptr;
+        }
+    }
     return nullptr;
 }
 
 Value* FunctionCallExprAST::codegen() const {
-    return nullptr;
+    Function* f = GetFunction(m_name);
+    if (f == nullptr) return logError("Failed finding function " + m_name);
+    if (m_args.size() != f->arg_size()) return logError("Wrong number of arguments!");
+
+    // Create arguments
+    std::vector<Value*> args;
+    for (auto & arg : m_args) args.push_back(arg->codegen());
+    return Builder.CreateCall(f, args, "calltmp");
 }
 
 Value* BoolExprAST::codegen() const {
-    return nullptr;
+    return LLVM_BOOL(m_val);
 }
 
 std::pair<int, VLANG_TYPE> DetermineExpressionConversion(const ExprAST* left, const ExprAST* right) {

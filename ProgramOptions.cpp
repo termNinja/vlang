@@ -43,8 +43,6 @@ bool ProgramOptions::contains_input_files() const {
 }
 
 bool ProgramOptions::emit_source() const {
-    // for debugging purposes, to be removed
-    return true;
     return m_vm["emit-source"].as<bool>();
 }
 
@@ -88,6 +86,10 @@ bool ProgramOptions::syntax_highlight() const {
     return m_vm["color-dump"].as<bool>();
 }
 
+bool ProgramOptions::emit_llvm() const {
+    return m_vm["emit-llvm"].as<bool>();
+}
+
 void ProgramOptions::init(int argc, char** argv) {
     if (ProgramOptions::get().is_init) {
         std::cerr << "Warning! Detected multiple init of ProgramOptions!" << std::endl;
@@ -102,6 +104,7 @@ void ProgramOptions::init(int argc, char** argv) {
         ("output,o", opt::value<std::string>()->default_value("a.out"), " executable output path and name")
         ("emit-source,s", opt::value<bool>()->default_value(false), " shows the parsed source code")
         ("color-dump,C", opt::value<bool>()->default_value(false), " if code is shown, this option gives it syntax highlight")
+        ("emit-llvm,l", opt::value<bool>()->default_value(true), " shows llvm ir on stdout")
     ;
 
     // Let's make any given unspecified argument as input file

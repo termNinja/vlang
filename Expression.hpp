@@ -195,19 +195,18 @@ private:
 /// -----------------------------------------------------------------------------------------------
 class VariableExprAST : public ExprAST {
 public:
-    //VariableExprAST(std::string name, VlangType* type)
-        //: m_name(name), m_type(type)
-    //{}
+    VariableExprAST(std::string name, VLANG_TYPE type)
+        : m_name(name), m_type(make_from_enum(type))
+    {}
     VariableExprAST(std::string name)
         : m_name(name)
     {}
     ~VariableExprAST() {
-        // TODO: actaully read the type from somewhere
-//        delete m_type;
+        delete m_type;
     }
     std::string name() const { return m_name; }
 
-    virtual const VlangType* type() const { return nullptr; }
+    virtual const VlangType* type() const { return m_type; }
     virtual std::string dump(unsigned level = 0) const;
     virtual Value* codegen() const;
     virtual EXP_TYPE exp_type() const { return EXP_TYPE::VARIABLE_EXP; }

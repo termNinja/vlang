@@ -11,6 +11,7 @@
 #include "LLVMCodegen.hpp"
 #include "Expression.hpp"
 #include <boost/lexical_cast.hpp>
+#include "LLVMCodegen.hpp"
 
 #include <string>
 #include <vector>
@@ -44,6 +45,9 @@ public:
     /// \brief Returns the line on which statement was found.
     unsigned long long int line() const { return m_line; }
 
+    /// \brief Returns an llvm::Value* representing an LLVM IR node/instruction.
+    virtual Value* codegen() const = 0;
+
 private:
     unsigned long long int m_line;
 };
@@ -57,8 +61,9 @@ public:
         : StmtAST(line), m_retVal(retVal)
     {}
     ~ReturnStmtAST() { delete m_retVal; }
-    std::string dump(int level = 0) const;
-    STMT_TYPE stmt_type() const { return STMT_TYPE::RETURN; }
+    virtual std::string dump(int level = 0) const;
+    virtual STMT_TYPE stmt_type() const { return STMT_TYPE::RETURN; }
+    virtual Value* codegen() const;
 
 private:
     ExprAST* m_retVal;
@@ -79,6 +84,7 @@ public:
     VLANG_TYPE type() const { return VLANG_TYPE::VOID; }
     STMT_TYPE stmt_type() const { return STMT_TYPE::BLOCK; }
     const std::vector<StmtAST*>& blockStatements() const { return m_cmds; }
+    virtual Value* codegen() const;
 
 private:
     std::vector<StmtAST*> m_cmds;
@@ -105,6 +111,7 @@ public:
     std::pair<VLANG_TYPE, VLANG_TYPE> assignmentTypes() const {
         return std::pair<VLANG_TYPE, VLANG_TYPE>(m_type, m_expr->type()->vlang_type());
     }
+    virtual Value* codegen() const;
 
 private:
     VLANG_TYPE m_type;
@@ -132,6 +139,7 @@ public:
             return std::pair<VLANG_TYPE, VLANG_TYPE>(m_type, exprType->vlang_type());
     }
     std::unique_ptr<std::vector<bool>> isAllowed() const;
+    virtual Value* codegen() const;
 
 private:
     VLANG_TYPE m_type;
@@ -149,6 +157,7 @@ public:
     ~ExpressionStmtAST() { delete m_expr; }
     std::string dump(int level = 0) const;
     STMT_TYPE stmt_type() const { return STMT_TYPE::EXPRESSION; }
+    virtual Value* codegen() const;
 
 private:
     ExprAST* m_expr;
@@ -160,6 +169,7 @@ public:
     EmptyStmtAST(unsigned long long line) : StmtAST(line) {}
     std::string dump(int level = 0) const;
     STMT_TYPE stmt_type() const { return STMT_TYPE::EMPTY; }
+    virtual Value* codegen() const;
 };
 
 /// -----------------------------------------------------------------------------------------------
@@ -176,6 +186,7 @@ public:
     }
     std::string dump(int level = 0) const;
     STMT_TYPE stmt_type() const { return STMT_TYPE::IF; }
+    virtual Value* codegen() const;
 
 private:
     ExprAST* m_condExpr;
@@ -197,6 +208,7 @@ public:
     }
     std::string dump(int level = 0) const;
     STMT_TYPE stmt_type() const { return STMT_TYPE::IF_ELSE; }
+    virtual Value* codegen() const;
 
 private:
     ExprAST* m_condExpr;
@@ -218,6 +230,7 @@ public:
     }
     std::string dump(int level = 0) const;
     STMT_TYPE stmt_type() const { return STMT_TYPE::WHILE; }
+    virtual Value* codegen() const;
 
 private:
     ExprAST* m_condExpr;
@@ -257,6 +270,7 @@ public:
     std::string name() const { return m_name; }
     virtual VLANG_TYPE ret_val_type() const { return m_retVal; }
     STMT_TYPE stmt_type() const { return STMT_TYPE::PROTOTYPE; }
+    virtual Value* codegen() const;
 
 private:
     std::string m_name;
@@ -279,6 +293,7 @@ public:
     STMT_TYPE stmt_type() const { return STMT_TYPE::FUNCTION; }
     virtual VLANG_TYPE ret_val_type() const { return m_proto.ret_val_type(); }
     const BlockStmtAST* body() const { return m_definition; }
+    virtual Value* codegen() const;
 
 private:
     PrototypeAST m_proto;

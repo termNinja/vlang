@@ -28,7 +28,7 @@ VLANG_TYPE Int32Type::vlang_type() const {
 }
 
 Type* Int32Type::llvm_type() const {
-    return LLVM_INTTY;
+    return LLVM_INTTY();
 }
 
 int Int32Type::strength() const {
@@ -49,7 +49,7 @@ VLANG_TYPE DoubleType::vlang_type() const {
 }
 
 Type* DoubleType::llvm_type() const {
-    return LLVM_DOUBLETY;
+    return LLVM_DOUBLETY();
 }
 
 int DoubleType::strength() const {
@@ -86,8 +86,7 @@ std::string BoolType::str() const {
 }
 
 Type* BoolType::llvm_type() const {
-    std::cerr << "TODO: BoolType::llvm_type()" << std::endl;
-    return nullptr;
+    return LLVM_BOOLTY();
 }
 
 VLANG_TYPE BoolType::vlang_type() const {
@@ -97,6 +96,29 @@ VLANG_TYPE BoolType::vlang_type() const {
 int BoolType::strength() const {
     return 10;
 }
+
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// VOID
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+std::string VoidType::str() const {
+    std::string res = "void";
+    if (util::ProgramOptions::get().syntax_highlight())
+        res = std::string(TYPE_C) + res + std::string(RESET);
+    return res;
+}
+
+Type* VoidType::llvm_type() const {
+    return LLVM_VOIDTY();
+}
+
+VLANG_TYPE VoidType::vlang_type() const {
+    return VLANG_TYPE::VOID;
+}
+
+int VoidType::strength() const {
+    return -10;
+}
+
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // UTILS
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -118,9 +140,9 @@ std::string to_str(VLANG_TYPE type) {
 
 // TODO: Support syntax highlight here? Not really needed atm...
 std::string to_str(Type* llvm_type) {
-    if (llvm_type == LLVM_INTTY)
+    if (llvm_type == LLVM_INTTY())
         return "int";
-    else if (llvm_type == LLVM_DOUBLETY)
+    else if (llvm_type == LLVM_DOUBLETY())
         return "double";
     else
         return "unknown_type";
@@ -136,8 +158,8 @@ VlangType* make_from_enum(VLANG_TYPE type) {
             return new StringType();
         case VLANG_TYPE::BOOL:
             return new BoolType();
-        case VLANG_TYPE::UNKNOWN:
-            return nullptr;
+        case VLANG_TYPE::VOID:
+            return new VoidType();
         default:
             std::cerr << "What is this type? " << to_str(type) << std::endl;
             return nullptr;
