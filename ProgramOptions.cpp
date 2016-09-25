@@ -43,9 +43,9 @@ bool ProgramOptions::contains_input_files() const {
 }
 
 bool ProgramOptions::emit_source() const {
-    if (m_vm.count("emit-source"))
-        return true;
-    else return false;
+    // for debugging purposes, to be removed
+    return true;
+    return m_vm["emit-source"].as<bool>();
 }
 
 void ProgramOptions::set_input(opt::variables_map vm) {
@@ -66,7 +66,7 @@ std::string ProgramOptions::show_state() const {
 
     // Showing input
     ss << separator << std::endl << BOLDBLUE;
-    
+
     ss << "Input: ";
     if (contains_input_files()) {
         ss << std::endl << BOLDWHITE;

@@ -234,7 +234,7 @@ private:
 class FunctionCallExprAST : public ExprAST {
 public:
     FunctionCallExprAST(std::string name, std::vector<ExprAST*> args, VLANG_TYPE retType)
-        : m_name(name), m_args(args)
+        : m_name(name), m_args(args), m_retType(retType)
     {}
     virtual std::string dump(unsigned level = 0) const;
     virtual Value* codegen() const;
@@ -244,7 +244,7 @@ public:
     }
     virtual ExprAST* convertTo(VLANG_TYPE type);
     virtual ExprAST* clone() const;
-    virtual const VlangType* type() const { 
+    virtual const VlangType* type() const {
         return make_from_enum(m_retType);
     }
 

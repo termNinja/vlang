@@ -15,6 +15,7 @@ namespace vlang {
 
 std::stack<std::map<std::string, VLANG_TYPE>> LocalVariableScopeContainer;
 std::map<std::string, ProtoDefContainer*> FunctionContainer;
+std::map<std::string, VLANG_TYPE> FunctionReturnType;
 
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 } // ;vlang

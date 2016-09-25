@@ -31,6 +31,9 @@ extern std::map<std::string, ProtoDefContainer*> FunctionContainer;
 /// \brief This counter is used by lexer in order to count program lines (so error can point the exact line)
 extern unsigned long long int ProgramLineCounter;
 
+/// \brief Returns the return type for given function name.
+/// extern std::map<std::string, VLANG_TYPE> FunctionReturnType;
+
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 } // ;vlang
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

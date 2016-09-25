@@ -24,8 +24,10 @@
 
 extern unsigned long long int ProgramLineCounter;
 
+/*extern std::map<std::string, vlang::VLANG_TYPE> FunctionReturnType;*/
+
 int yylex();
-void yyerror(const std::string &err_msg) {
+void yyerror(std::string err_msg) {
     std::cerr << err_msg << std::endl;
     exit(EXIT_FAILURE);
 }
@@ -35,7 +37,6 @@ void syntax_error(std::string err_msg) {
     std::cerr << fileName << ":" << ProgramLineCounter << ":" << BOLDRED << "error: " << RESET;
     std::cerr << err_msg << std::endl;
 }
-
 
 %}
 
@@ -151,12 +152,12 @@ Stmt: FunDeclaration ';' {
 
     // We try to find the given declaration
     auto finder = vlang::FunctionContainer.find($1->name());
-    if (finder == vlang::FunctionContainer.end())
+    if (finder == vlang::FunctionContainer.end()) {
         vlang::FunctionContainer.insert(std::pair<std::string, vlang::ProtoDefContainer*>($1->name(), $1));
-    else {
+        /*vlang::FunctionReturnType.insert(std::pair<std::string, vlang::VLANG_TYPE>($1->name(), $1->ret_val_type()));*/
+    } else {
         // We report an error
         std::cerr << "Function '" << $1->name() << "' already exists.\n" << finder->second->dump() << std::endl;
-        std::cerr << "Failed adding given function. " << std::endl;
         isValid = false;
     }
     if (isValid) {
@@ -305,9 +306,13 @@ Expr: '(' Expr ')' {
 | id_tok '(' ExprList ')' {
     auto finder = vlang::FunctionContainer.find(*$1);
     vlang::VLANG_TYPE type;
-    if (finder == vlang::FunctionContainer.end())
-        type = vlang::VLANG_TYPE::UNKNOWN; 
-    else type = finder->second->ret_val_type();
+    if (finder == vlang::FunctionContainer.end()) {
+        type = vlang::VLANG_TYPE::UNKNOWN;
+        std::cerr << "Setting unknown_t to " << *$1 << std::endl;
+    } else {
+        type = finder->second->ret_val_type();
+        std::cerr << "Setting " << vlang::to_str(type) << " to " << *$1 << std::endl;
+    }
     $$ = new vlang::FunctionCallExprAST(*$1, *$3, type);
     delete $1;
     delete $3;
