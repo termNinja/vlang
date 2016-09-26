@@ -67,21 +67,25 @@ Value* BlockStmtAST::codegen() const {
 
 Value* handleAssignment(std::string varName, ExprAST* expr, VLANG_TYPE type) {
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
-    if (type != VLANG_TYPE::NO_VAR_DECL) {
+    AllocaInst* addr = NamedValues[varName];
+    if (addr == nullptr) {
         // We allocate memory for variable
         std::unique_ptr<VlangType> t(make_from_enum(type));
-        AllocaInst* addr = GetEntryBlockAllocaForType(TheFunction, t->llvm_type(), varName);
+        addr = GetEntryBlockAllocaForType(TheFunction, t->llvm_type(), varName);
 
         // And put it in named values
         NamedValues[varName] = addr;
     }
-    AllocaInst* addr = NamedValues[varName];
     if (addr == nullptr) return logError("Failed getting addres for variable " + varName);
 
+    // We have no expression because variable was declared
+    if (expr == nullptr) {
+        return LLVM_BOOL(true);
+    }
     Value* assignMe = expr->codegen();
     if (assignMe == nullptr) return logError("Failed m_expr->codegen() in AssignmentStmtAST::codegen()");
 
-    Builder.CreateStore(addr, assignMe);
+    Builder.CreateStore(assignMe, addr);
     return LLVM_BOOL(true);
 }
 
@@ -208,38 +212,38 @@ Value* IfElseStmtAST::codegen() const {
 Value* WhileStmtAST::codegen() const {
     Function* TheFunction = Builder.GetInsertBlock()->getParent();
 
-	BasicBlock* entryBB = BasicBlock::Create(TheContext, "entry_while", TheFunction);
-	BasicBlock* loopBB = BasicBlock::Create(TheContext, "loop_while");
-	BasicBlock* endBB = BasicBlock::Create(TheContext, "end_while");
+    BasicBlock* entryBB = BasicBlock::Create(TheContext, "entry_while", TheFunction);
+    BasicBlock* loopBB = BasicBlock::Create(TheContext, "loop_while");
+    BasicBlock* endBB = BasicBlock::Create(TheContext, "end_while");
 
-	// Jump into entry
-	Builder.CreateBr(entryBB);
+    // Jump into entry
+    Builder.CreateBr(entryBB);
 
-	// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	// HANDLE LOOP ENTRY
-	// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	Builder.SetInsertPoint(entryBB);
-	Value* condVal = m_condExpr->codegen();
-	if (! condVal) return logError("Failed m_cond->codegen() in WhileExprAST::codegen()");
+    // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // HANDLE LOOP ENTRY
+    // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    Builder.SetInsertPoint(entryBB);
+    Value* condVal = m_condExpr->codegen();
+    if (! condVal) return logError("Failed m_cond->codegen() in WhileExprAST::codegen()");
     if (condVal->getType() == LLVM_DOUBLETY())
         condVal = Builder.CreateFCmpONE(condVal, LLVM_DOUBLE(0.0), "while_cmp");
-	Builder.CreateCondBr(condVal, loopBB, endBB);
-	entryBB = Builder.GetInsertBlock();
+    Builder.CreateCondBr(condVal, loopBB, endBB);
+    entryBB = Builder.GetInsertBlock();
 
-	// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	// HANDLE LOOP BODY
-	// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	TheFunction->getBasicBlockList().push_back(loopBB);
-	Builder.SetInsertPoint(loopBB);
-	Value* bodyVal = m_bodyStmt->codegen();
-	if (! bodyVal) return logError("Failed m_body->codegen() in WhileExprAST::codegen()");
-	Builder.CreateBr(entryBB);
+    // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // HANDLE LOOP BODY
+    // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    TheFunction->getBasicBlockList().push_back(loopBB);
+    Builder.SetInsertPoint(loopBB);
+    Value* bodyVal = m_bodyStmt->codegen();
+    if (! bodyVal) return logError("Failed m_body->codegen() in WhileExprAST::codegen()");
+    Builder.CreateBr(entryBB);
 
-	// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	// HANDLE LOOP END
-	// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	TheFunction->getBasicBlockList().push_back(endBB);
-	Builder.SetInsertPoint(endBB);
+    // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // HANDLE LOOP END
+    // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    TheFunction->getBasicBlockList().push_back(endBB);
+    Builder.SetInsertPoint(endBB);
 
     return LLVM_BOOL(true);
 }
@@ -318,12 +322,14 @@ std::unique_ptr<std::vector<bool>> AssignmentListStmtAST::isAllowed() const {
     std::unique_ptr<std::vector<bool>> result(new std::vector<bool>());
 
     for (auto &ass : m_list) {
-        const VlangType* exprType = ass.second->type();
-        if (exprType == nullptr) result->push_back(false);
-        else if (semant::SemanticAnalyzer::isAllowedAssignment(m_type, exprType->vlang_type()))
-            result->push_back(true);
-        else
-            result->push_back(false);
+        if (ass.second != nullptr) {
+            const VlangType* exprType = ass.second->type();
+            if (exprType == nullptr) result->push_back(false);
+            else if (semant::SemanticAnalyzer::isAllowedAssignment(m_type, exprType->vlang_type()))
+                result->push_back(true);
+            else
+                result->push_back(false);
+        } else result->push_back(true);         // we only had a declaration of variable
     }
 
     return result;

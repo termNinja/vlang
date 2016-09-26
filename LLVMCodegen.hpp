@@ -57,4 +57,6 @@ AllocaInst* CreateEntryBlockAllocaIntDouble(Function* TheFunction, const std::st
 
 AllocaInst* GetEntryBlockAllocaForType(Function* TheFunction, Type* type, const std::string& name);
 
+void write_llvm_to_bitcode();
+
 #endif /* ifndef LLVM_CODEGEN_HPP */

@@ -73,6 +73,11 @@ return              return return_tok;
     return *yytext;
 }
 
+">="                return GTE_tok;
+"<="                return LTE_tok;
+"=="                return EQ_tok;
+"!="                return NEQ_tok;
+
 [,.<>;=!&|:?()\[\]+*/%-] {
     return *yytext;
 }

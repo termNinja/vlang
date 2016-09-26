@@ -48,6 +48,8 @@ std::vector<vlang::StmtAST*>* ParsedProgram;
 %token stdout_printf_tok
 /* Keywords */
 %token return_tok for_tok while_tok if_tok else_tok
+/* Operators */
+%token GTE_tok LTE_tok EQ_tok NEQ_tok
 
 %union {
     // Constants
@@ -80,7 +82,7 @@ std::vector<vlang::StmtAST*>* ParsedProgram;
 
 %nonassoc else_tok
 %left '='
-%left '>' '<'
+%left '>' '<' GTE_tok LTE_tok EQ_tok NEQ_tok
 %left '+' '-' '%'
 %left '*' '/'
 
@@ -210,7 +212,7 @@ Instruction: return_tok Expr ';' {
     $$ = new vlang::ExpressionStmtAST($1, ProgramLineCounter);
 }
 | id_tok '=' Expr ';' {
-    $$ = new vlang::AssignmentStmtAST(vlang::VLANG_TYPE::NO_VAR_DECL, *$1, $3, ProgramLineCounter);
+    $$ = new vlang::AssignmentStmtAST(vlang::GetVariableType(*$1), *$1, $3, ProgramLineCounter);
     delete $1;
 }
 /* Changed with Assignments (more abstract)
@@ -273,6 +275,18 @@ Expr: '(' Expr ')' {
 | Expr '>' Expr {
     $$ = new vlang::BinaryExprAST(">", $1, $3);
 }
+| Expr GTE_tok Expr {
+    $$ = new vlang::BinaryExprAST(">=", $1, $3);
+}
+| Expr LTE_tok Expr {
+    $$ = new vlang::BinaryExprAST("<=", $1, $3);
+}
+| Expr EQ_tok Expr {
+    $$ = new vlang::BinaryExprAST("==", $1, $3);
+}
+| Expr NEQ_tok Expr {
+    $$ = new vlang::BinaryExprAST("!=", $1, $3);
+}
 | int_val_tok {
     $$ = new vlang::ConstIntExprAST($1);
 }
@@ -287,6 +301,7 @@ Expr: '(' Expr ')' {
     delete $1;
 }
 | id_tok {
+    std::cerr << *$1 << " type is " << vlang::to_str(vlang::GetVariableType(*$1)) << std::endl;
     $$ = new vlang::VariableExprAST(*$1, vlang::GetVariableType(*$1));
     delete $1;
 }
@@ -298,7 +313,7 @@ Expr: '(' Expr ')' {
         std::cerr << "Setting unknown_t to " << *$1 << std::endl;
     } else {
         type = finder->second->ret_val_type();
-        std::cerr << "Setting " << vlang::to_str(type) << " to " << *$1 << std::endl;
+        /*std::cerr << "Setting " << vlang::to_str(type) << " to " << *$1 << std::endl;*/
     }
     $$ = new vlang::FunctionCallExprAST(*$1, *$3, type);
     delete $1;
@@ -416,9 +431,9 @@ int main(int argc, char** argv) {
 
     // Show source if required
     if (vlang::util::ProgramOptions::get().emit_source()) {
-        std::cout << std::endl << DRAGON_SEPARATOR() << std::endl;
-        std::cout << "parsed source:" << std::endl;
-        std::cout << DRAGON_SEPARATOR() << std::endl;
+        std::cout << std::endl << BOLDRED << DRAGON_SEPARATOR() << RESET << std::endl;
+        std::cout << BOLDBLUE << "Parsed source:" << RESET << std::endl;
+        std::cout << BOLDRED << DRAGON_SEPARATOR() << RESET << std::endl;
         for (auto &stmt : *ParsedProgram)
             std::cout << stmt->dump() << std::endl;
         std::cout << std::endl << std::endl;
@@ -438,10 +453,16 @@ int main(int argc, char** argv) {
         miniast->codegen();
     }
 
+    write_llvm_to_bitcode();
+
     if (vlang::util::ProgramOptions::get().emit_llvm()) {
+        std::cout << std::endl << std::endl << BOLDRED << DRAGON_SEPARATOR() << RESET << std::endl;
+        std::cout << BOLDBLUE << "LLVM IR:" << RESET << std::endl;
+        std::cout << BOLDRED << DRAGON_SEPARATOR() << RESET << std::endl;
         TheModule->dump();
         std::cout << "\n; End of module" << std::endl;
     }
+
 
     for (auto &miniast : *ParsedProgram)
         delete miniast;

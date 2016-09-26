@@ -304,6 +304,9 @@ public:
     virtual ExprAST* convertTo(VLANG_TYPE type);
     virtual ExprAST* clone() const;
 
+    bool is_arithmetic() const;
+    bool is_relational() const;
+
 private:
     std::string m_op;
     ExprAST* m_left;

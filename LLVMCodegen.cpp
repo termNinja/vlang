@@ -6,8 +6,12 @@
  */
 
 #include "LLVMCodegen.hpp"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Bitcode/ReaderWriter.h"
+#include "ProgramOptions.hpp"
 
 #include <iostream>
+#include <fstream>
 
 std::unique_ptr<Module> TheModule;
 LLVMContext TheContext;
@@ -17,6 +21,35 @@ IRBuilder<> Builder(TheContext);
 std::unique_ptr<legacy::FunctionPassManager> TheFPM;
 
 Function* mainFunction = nullptr;
+
+void write_llvm_to_bitcode() {
+    std::string output;
+    llvm::raw_string_ostream out(output);
+    std::cout << output << std::endl;
+    llvm::WriteBitcodeToFile(TheModule.get(), out);
+    output = out.str();
+
+    std::string outputPath = vlang::util::ProgramOptions::get().output_path();
+
+    std::ofstream ofstr("build/tmp.bc");
+    ofstr << output;
+    ofstr.flush();
+
+    // Perform translation to assembly and link with glibc
+    // llc build/tmp.bc -o build/tmp.s
+    // gcc build/tmp.s lib/io.c -o outputPath
+    std::cerr << "[cc]: Translating to assembly." << std::endl;
+    std::string cmd = "llc build/tmp.bc -o build/tmp.s";
+    system(cmd.c_str());
+
+    std::cerr << "Linking with io lib." << std::endl;
+    cmd = "gcc build/tmp.s lib/io.c -o " + outputPath;
+    system(cmd.c_str());
+
+    //llvm::raw_fd_ostream OS("module", EC
+    //WriteBitcodeToFile(TheModule, OS);
+    //OS.flush();
+}
 
 Value* logError(std::string err_msg) {
     std::cerr << err_msg << std::endl;

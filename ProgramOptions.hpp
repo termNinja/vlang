@@ -61,6 +61,9 @@ public:
     /// \brief Returns true if compiler should emit llvm code.
     bool emit_llvm() const;
 
+    /// \brief Done for testing, to be removed.
+    void write_llvm_to_bitcode() const;
+
 private:
     ProgramOptions() {}
     ProgramOptions(const ProgramOptions&) = delete;
