@@ -1,6 +1,6 @@
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# 				       Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
-# 				       		   Distributed under terms of the MIT license.
+#					   Copyright (C) 2016 Nemanja Mićović <nmicovic@outlook.com>
+#							   Distributed under terms of the MIT license.
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 #                                             /   \
 #            _                        )      ((   ))     (
@@ -25,24 +25,24 @@ CXX = clang++
 CXXFLAGS = -g $(shell llvm-config --cxxflags) -fexceptions
 LDFLAGS = $(shell llvm-config --ldflags --system-libs --libs core native mcjit)
 BOOST = -DBOOST_NO_EXCEPTIONS -DBOOST_NO_EXCEPTION_STD_NAMESPACE -L /usr/lib/ -lm -lboost_program_options -fexceptions
-FILES =  					\
-	Makefile 				\
-	parser.ypp 				\
-	lexer.lex 				\
-	color.h 				\
-	Expression.cpp 			\
-	Expression.hpp 			\
+FILES =						\
+	Makefile				\
+	parser.ypp				\
+	lexer.lex				\
+	color.h					\
+	Expression.cpp			\
+	Expression.hpp			\
 	GlobalContainers.cpp	\
-	GlobalContainers.hpp 	\
-	LLVMCodegen.cpp 		\
-	LLVMCodegen.hpp 		\
-	ProgramOptions.cpp 		\
+	GlobalContainers.hpp	\
+	LLVMCodegen.cpp			\
+	LLVMCodegen.hpp			\
+	ProgramOptions.cpp		\
 	ProgramOptions.hpp		\
 	SemanticAnalyzer.cpp	\
-	SemanticAnalyzer.hpp 	\
-	Statement.cpp 			\
-	Statement.hpp 			\
-	Types.cpp 				\
+	SemanticAnalyzer.hpp	\
+	Statement.cpp			\
+	Statement.hpp			\
+	Types.cpp				\
 	Types.hpp
 
 CLOC = $(shell type -p cloc || echo wc -l)
@@ -51,7 +51,7 @@ $(PROGRAM): lex.yy.o parser.tab.o LLVMCodegen.o Expression.o Types.o Statement.o
 			ProgramOptions.o GlobalContainers.o SemanticAnalyzer.o
 	$(CXX) -o $@ $^ $(LDFLAGS) $(BOOST)
 	@echo
-parser.tab.o: 	parser.tab.cpp parser.tab.hpp LLVMCodegen.hpp Types.hpp Expression.hpp \
+parser.tab.o:	parser.tab.cpp parser.tab.hpp LLVMCodegen.hpp Types.hpp Expression.hpp \
 				Statement.hpp ProgramOptions.hpp GlobalContainers.hpp \
 				SemanticAnalyzer.hpp color.h
 	$(CXX) -c -o $@ $< $(CXXFLAGS)

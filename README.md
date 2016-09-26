@@ -63,10 +63,13 @@ In order to build the project, make sure to have:
 - [ ] support advanced control structures (if-elseif-...-else, for, switch) (maybe)
 - [x] support functions
 - [ ] support classes
-- [ ] basics of semantic analysis
+- [x] basics of semantic analysis
 - [x] include llvm
-- [ ] generate basic LLVM IR (constants, variables, functions)
-- [ ] generated additional LLVM IR (pointers, strings, arrays)
+- [x] generate basic LLVM IR (constants, variables, functions)
+- [x] produce a basic executable
+- [x] add some io external function
+- [ ] generate additional LLVM IR (pointers, strings, arrays)
+- [ ] add more to semantic analysis
 - [x] add compiler options (for example ```vlang main.vala point.vala -o geometry```)
 
 ## Running vlang
@@ -84,7 +87,7 @@ You can run vlang without input files and it will start in interpret mode.
 
 ```
 ********************************************************
-Input: 
+Input:
 * tests/01_simple.vala
 Output: a.out
 ********************************************************
